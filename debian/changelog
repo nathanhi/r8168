@@ -1,0 +1,5 @@
+r8168 (8.025.00-1) unstable; urgency=low
+
+  * Initial release.  (Closes: #642198)
+
+ -- Andreas Beckmann <debian@abeckmann.de>  Tue, 20 Sep 2011 10:55:15 +0200

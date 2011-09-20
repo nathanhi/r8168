@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+VERSION	:= $(shell dpkg-parsechangelog | sed -nr '/^Version:/s/Version: (.*:)?(.*)-(.*)/\2/p')
+
+%:
+	dh $@
+
+override_dh_install:
+	dh_install
+	mv debian/r8168-dkms/usr/src/r8168-xxx debian/r8168-dkms/usr/src/r8168-$(VERSION)
+	dh_dkms -V $(VERSION)
+
+# do nothing
+override_dh_auto_configure override_dh_auto_build override_dh_auto_test override_dh_auto_install:

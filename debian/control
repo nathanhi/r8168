@@ -1,0 +1,21 @@
+Source: r8168
+Section: kernel
+Priority: extra
+Maintainer: Andreas Beckmann <debian@abeckmann.de>
+Build-Depends: debhelper (>= 8), dkms
+Standards-Version: 3.9.2
+Homepage: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
+
+Package: r8168-dkms
+Architecture: all
+Depends: ${misc:Depends}
+Description: dkms source for the r8168 network driver
+ r8168 is the Linux device driver released for RealTek RTL8168B/8111B,
+ RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
+ RTK8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
+ .
+ This driver should only used for devices not yet supported by the in-kernel
+ driver r8169.
+ .
+ This package provides the dkms source code for the r8168 kernel modules.
+ Kernel source or headers are required to compile these modules.
