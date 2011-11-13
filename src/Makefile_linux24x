@@ -4,7 +4,7 @@
 # RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
 # RTL8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
 # 
-# Copyright(c) 2009 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2011 Realtek Semiconductor Corp. All rights reserved.
 # 
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -28,13 +28,14 @@
 ################################################################################
 # This product is covered by one or more of the following patents:
 # US5,307,459, US5,434,872, US5,732,094, US6,570,884, US6,115,776, and US6,327,625.
-#################################################################################
+################################################################################
 
 CC		:= gcc
 LD		:= ld
 ARCH		:= $(shell uname -m | sed 's/i.86/i386/')
 KSRC		:= /lib/modules/$(shell uname -r)/build
 CONFIG_FILE	:= $(KSRC)/include/linux/autoconf.h
+KMISC		:= /lib/modules/$(shell uname -r)/kernel/drivers/net/
 
 
 ifeq ($(ARCH),x86_64)
@@ -69,3 +70,7 @@ modules: $(OBJS)
 
 clean:
 	rm *.o -f
+
+install:
+	install -m 744 -c r8168.o $(KMISC)
+	depmod -a

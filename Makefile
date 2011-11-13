@@ -4,7 +4,7 @@
 # RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP
 # Gigabit Ethernet controllers with PCI-Express interface.
 # 
-# Copyright(c) 2009 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2011 Realtek Semiconductor Corp. All rights reserved.
 # 
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -30,18 +30,30 @@
 # US5,307,459, US5,434,872, US5,732,094, US6,570,884, US6,115,776, and US6,327,625.
 ################################################################################
 
+KFLAG := 2$(shell uname -r | sed -ne 's/^2\.[4]\..*/4/p')x
+
 all: clean modules install
 
 modules:
+ifeq ($(KFLAG),24x)
+	$(MAKE) -C src/ -f Makefile_linux24x modules
+else
 	$(MAKE) -C src/ modules
+endif
 
 clean:
+ifeq ($(KFLAG),24x)
+	$(MAKE) -C src/ -f Makefile_linux24x clean
+else
 	$(MAKE) -C src/ clean
+endif
                                                                                                                              
 install:
+ifeq ($(KFLAG),24x)
+	$(MAKE) -C src/ -f Makefile_linux24x install
+else
 	$(MAKE) -C src/ install
-
-
+endif
 
 
 

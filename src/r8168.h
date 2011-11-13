@@ -32,6 +32,10 @@
  * US5,307,459, US5,434,872, US5,732,094, US6,570,884, US6,115,776, and US6,327,625.
  */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+#define HAVE_NET_DEVICE_OPS
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
 #define CHECKSUM_PARTIAL CHECKSUM_HW
 #endif
@@ -103,7 +107,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.025.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.026.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -1023,7 +1027,7 @@ enum _DescStatusBit {
 	/*------ offset 0 of tx descriptor ------*/
 	LargeSend	= (1 << 27), /* TCP Large Send Offload (TSO) */
 	MSSShift	= 16,        /* MSS value position */
-	MSSMask		= 0xfff,     /* MSS value + LargeSend bit: 12 bits */
+	MSSMask		= 0x7ffU,    /* MSS value + LargeSend bit: 12 bits */
 	TxIPCS		= (1 << 18), /* Calculate IP checksum */
 	TxUDPCS		= (1 << 17), /* Calculate UDP/IP checksum */
 	TxTCPCS		= (1 << 16), /* Calculate TCP/IP checksum */
