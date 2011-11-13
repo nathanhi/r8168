@@ -4,7 +4,7 @@
 # RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
 # RTL8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
 # 
-# Copyright(c) 2009 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2011 Realtek Semiconductor Corp. All rights reserved.
 # 
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -30,31 +30,35 @@
 # US5,307,459, US5,434,872, US5,732,094, US6,570,884, US6,115,776, and US6,327,625.
 ################################################################################
 
-KVER		:= $(shell uname -r)
-KDIR		:= /lib/modules/$(KVER)/build
-KMISC		:= /lib/modules/$(KVER)/kernel/drivers/net/
-KEXT		:= $(shell echo $(KVER) | sed -ne 's/^2\.[567]\..*/k/p')o
-KFLAG		:= 2$(shell echo $(KVER) | sed -ne 's/^2\.[4]\..*/4/p')x
-
-EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
-EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
-
-modules:
-ifeq ($(KFLAG),24x)
-	$(MAKE) -f Makefile_linux24x
+ifneq ($(KERNELRELEASE),)
+	obj-m := r8168.o
+	r8168-objs := r8168_n.o r8168_asf.o rtl_eeprom.o rtltool.o
+	EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
+	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
 else
-	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD)/src modules
-	strip --strip-debug r8168.$(KEXT)
+	BASEDIR := /lib/modules/$(shell uname -r)
+	KERNELDIR ?= $(BASEDIR)/build
+	PWD :=$(shell pwd)
+	DRIVERDIR := $(shell find $(BASEDIR)/kernel/drivers/net -name realtek -type d)
+	ifeq ($(DRIVERDIR),)
+		DRIVERDIR := $(BASEDIR)/kernel/drivers/net
+	endif
+	RTKDIR := $(subst $(BASEDIR)/,,$(DRIVERDIR))
+
+.PHONY: all
+all: clean modules install
+
+.PHONY:modules
+modules:
+	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) modules
+
+.PHONY:clean
+clean:
+	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) clean
+
+.PHONY:install
+install:
+	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) INSTALL_MOD_DIR=$(RTKDIR) modules_install
+
 endif
 
-clean:
-	rm -rf *.o *.ko *~ core* .dep* .*.d .*.cmd *.mod.c *.a *.s .*.flags .tmp_versions Module.symvers Modules.symvers Module.markers *.order
-
-
-install:
-	install -m 744 -c r8168.$(KEXT) $(KMISC)
-
-ifneq ($(KFLAG),24x)
-obj-m += r8168.o
-r8168-objs :=  r8168_n.o r8168_asf.o rtl_eeprom.o rtltool.o
-endif#($(KFLAG),24x)

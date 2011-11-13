@@ -26,7 +26,7 @@ module=`ls src/*.ko`
 module=${module#src/}
 module=${module%.ko}
 
-if [ "$module" == "" ]; then
+if [ "$module" = "" ]; then
 	echo "No driver exists!!!"
 	exit 1
 elif [ "$module" != "r8169" ]; then
@@ -47,10 +47,32 @@ elif [ "$module" != "r8169" ]; then
 	fi
 fi
 
-echo "Depending module. Please wait."
-depmod -a
 echo "load module $module"
 modprobe $module
 
+is_update_initramfs=n
+distrib_list="ubuntu debian"
+
+if [ -r /etc/debian_version ]; then
+	is_update_initramfs=y
+elif [ -r /etc/lsb-release ]; then
+	for distrib in $distrib_list
+	do
+		/bin/grep -i "$distrib" /etc/lsb-release 2>&1 /dev/null && \
+			is_update_initramfs=y && break
+	done
+fi
+
+if [ "$is_update_initramfs" = "y" ]; then
+	if which update-initramfs >/dev/null ; then
+		echo "Updating initramfs. Please wait."
+		update-initramfs -u -k $(uname -r)
+	else
+		echo "update-initramfs: command not found"
+		exit 1
+	fi
+fi
+
 echo "Completed."
 exit 0
+
