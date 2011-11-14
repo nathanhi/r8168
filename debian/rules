@@ -3,11 +3,12 @@
 VERSION	:= $(shell dpkg-parsechangelog | sed -nr '/^Version:/s/Version: (.*:)?(.*)-(.*)/\2/p')
 
 %:
-	dh $@
+	dh $@ --with dkms
 
 override_dh_install:
-	dh_install
 	dh_install src/*.h src/*.c src/Makefile usr/src/r8168-$(VERSION)/
+
+override_dh_dkms:
 	dh_dkms -V $(VERSION)
 
 # do nothing
