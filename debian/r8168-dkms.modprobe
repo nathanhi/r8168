@@ -1,0 +1,2 @@
+# blacklisted by r8168-dkms
+blacklist r8169

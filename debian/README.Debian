@@ -1,0 +1,26 @@
+
+If you are using r8168-dkms because the in-kernel r8169 does not
+support your NIC or is not working properly, please check the
+following:
+
+* Have you tried a more recent kernel? The problem may be fixed
+  there already. In that case the current r8169 driver may be
+  ported back to an older kernel - please report a bug against
+  the Debian kernel package where r8169 is not working as
+  expected.
+
+* If no version of the in-kernel driver r8169 supports your NIC,
+  please report this to the r8169 maintainers, so that this can
+  be fixed:
+
+    To: Realtek linux nic maintainers <nic_swsd@realtek.com>
+    To: Francois Romieu <romieu@fr.zoreil.com>
+    Cc: netdev@vger.kernel.org
+
+  You may also wish to open a Debian bug report and Cc that.
+
+
+If you want to switch back from r8168-dkms to the in-kernel r8169
+driver it is necessary to purge the r8168-dkms package,
+otherwise the blacklist for r8169 won't be removed.
+

@@ -14,8 +14,12 @@ Description: dkms source for the r8168 network driver
  RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
  RTK8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
  .
- This driver should only used for devices not yet supported by the in-kernel
- driver r8169.
+ This driver should only be used for devices not yet supported by the
+ in-kernel driver r8169. Please see the README.Debian for instructions how
+ to report bugs against r8169 that made it necessary to use r8168-dkms.
+ .
+ Installation of the r8168-dkms package will disable the in-kernel r8169
+ module. To re-enable r8169, the r8168-dkms package must be purged.
  .
  This package provides the dkms source code for the r8168 kernel modules.
  Kernel source or headers are required to compile these modules.
