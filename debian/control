@@ -5,7 +5,7 @@ Maintainer: Andreas Beckmann <debian@abeckmann.de>
 DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 8), dkms
 Standards-Version: 3.9.2
-Homepage: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
+Homepage: http://code.google.com/p/r8168/
 Vcs-Git: git://github.com/anbe42/r8168.git
 Vcs-Browser: https://github.com/anbe42/r8168
 
