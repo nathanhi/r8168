@@ -4,6 +4,7 @@ Source: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFi
 
 Files: *
 Copyright: Copyright(c) 2009-2011 Realtek Semiconductor Corp. All rights reserved.
+           Copyright (C) 2011  Realtek NIC software team <nicfae@realtek.com>
 License: GPL-2.0+
 
 Files: debian/*
