@@ -6,8 +6,8 @@ DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 8), dkms
 Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/r8168/
-Vcs-Git: git://github.com/anbe42/r8168.git
-Vcs-Browser: https://github.com/anbe42/r8168
+Vcs-Git: git://git.debian.org/git/collab-maint/r8168.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/r8168.git
 
 Package: r8168-dkms
 Architecture: all
