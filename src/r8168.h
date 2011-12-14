@@ -32,10 +32,6 @@
  * US5,307,459, US5,434,872, US5,732,094, US6,570,884, US6,115,776, and US6,327,625.
  */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
-#define HAVE_NET_DEVICE_OPS
-#endif
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
 #define CHECKSUM_PARTIAL CHECKSUM_HW
 #endif
@@ -68,9 +64,7 @@
 #define gso_segs	tso_segs
 #endif
 
-#ifdef HAVE_NET_DEVICE_OPS
-	#define RTL_NET_DEVICE_OPS(ops)	dev->netdev_ops=&ops
-#else
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 	#ifdef CONFIG_NET_POLL_CONTROLLER
 		#define RTL_NET_POLL_CONTROLLER dev->poll_controller=rtl8168_netpoll
 	#else
@@ -94,12 +88,16 @@
 					dev->do_ioctl=rtl8168_do_ioctl; \
 					RTL_NET_POLL_CONTROLLER; \
 					RTL_SET_VLAN;
-#endif //HAVE_NET_DEVICE_OPS
+#else
+	#define RTL_NET_DEVICE_OPS(ops)	dev->netdev_ops=&ops
+#endif
 
 //Due to the hardware design of RTL8111B, the low 32 bit address of receive
 //buffer must be 8-byte alignment.
-#undef NET_IP_ALIGN
-#define NET_IP_ALIGN 8
+#ifndef NET_IP_ALIGN
+#define NET_IP_ALIGN		2
+#endif
+#define RTK_RX_ALIGN		8
 
 #ifdef CONFIG_R8168_NAPI
 #define NAPI_SUFFIX	"-NAPI"
@@ -107,7 +105,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.026.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.027.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -1191,7 +1189,6 @@ struct rtl8168_private {
 	u16 intr_mask;
 	int phy_auto_nego_reg;
 	int phy_1000_ctrl_reg;
-	u8 mac_addr[NODE_ADDRESS_SIZE];
 	u8 org_mac_addr[NODE_ADDRESS_SIZE];
 #ifdef CONFIG_R8168_VLAN
 	struct vlan_group *vlgrp;

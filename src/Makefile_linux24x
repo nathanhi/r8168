@@ -73,4 +73,3 @@ clean:
 
 install:
 	install -m 744 -c r8168.o $(KMISC)
-	depmod -a

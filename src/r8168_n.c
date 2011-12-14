@@ -53,10 +53,12 @@
 #include <linux/init.h>
 #include <linux/rtnetlink.h>
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
+#define dev_printk(A,B,fmt,args...)	printk(A fmt,##args)
+#else
 #include <linux/dma-mapping.h>
 #include <linux/moduleparam.h>
-#endif//LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
+#endif
 
 #include <asm/io.h>
 #include <asm/irq.h>
@@ -209,6 +211,10 @@ static const struct {
 };
 #undef _R
 
+#ifndef PCI_VENDOR_ID_DLINK
+#define PCI_VENDOR_ID_DLINK	0x1186
+#endif
+
 static struct pci_device_id rtl8168_pci_tbl[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_REALTEK,	0x8168), },
 	{ PCI_VENDOR_ID_DLINK, 0x4300, 0x1186, 0x4b10,},
@@ -290,7 +296,7 @@ static int rtl8168_change_mtu(struct net_device *dev, int new_mtu);
 static void rtl8168_down(struct net_device *dev);
 
 static int rtl8168_set_mac_address(struct net_device *dev, void *p);
-void rtl8168_rar_set(struct rtl8168_private *tp, uint8_t *addr, uint32_t index);
+void rtl8168_rar_set(struct rtl8168_private *tp, uint8_t *addr);
 static void rtl8168_tx_desc_init(struct rtl8168_private *tp);
 static void rtl8168_rx_desc_init(struct rtl8168_private *tp);
 
@@ -543,7 +549,7 @@ void mdio_write(struct rtl8168_private *tp,
 	else
 	{
 		if (tp->mcfg == CFG_METHOD_12 || tp->mcfg == CFG_METHOD_13)
-			RTL_W32(0xD0, RTL_R32(0xD0)&~0x00020000);
+			RTL_W32(0xD0, RTL_R32(0xD0) & ~0x00020000);
 
 		RTL_W32(PHYAR, PHYAR_Write |
 			(RegAddr & PHYAR_Reg_Mask) << PHYAR_Reg_shift |
@@ -561,7 +567,7 @@ void mdio_write(struct rtl8168_private *tp,
 		}
 
 		if (tp->mcfg == CFG_METHOD_12 || tp->mcfg == CFG_METHOD_13)
-			RTL_W32(0xD0, RTL_R32(0xD0)|0x00020000);
+			RTL_W32(0xD0, RTL_R32(0xD0) | 0x00020000);
 	}
 }
 
@@ -601,7 +607,7 @@ u32 mdio_read(struct rtl8168_private *tp,
 	else
 	{
 		if (tp->mcfg == CFG_METHOD_12 || tp->mcfg == CFG_METHOD_13)
-			RTL_W32(0xD0, RTL_R32(0xD0)&~0x00020000);
+			RTL_W32(0xD0, RTL_R32(0xD0) & ~0x00020000);
 
 		RTL_W32(PHYAR,
 			PHYAR_Read | (RegAddr & PHYAR_Reg_Mask) << PHYAR_Reg_shift);
@@ -618,7 +624,7 @@ u32 mdio_read(struct rtl8168_private *tp,
 		}
 
 		if (tp->mcfg == CFG_METHOD_12 || tp->mcfg == CFG_METHOD_13)
-			RTL_W32(0xD0, RTL_R32(0xD0)|0x00020000);
+			RTL_W32(0xD0, RTL_R32(0xD0) | 0x00020000);
 	}
 
 	return value;
@@ -747,11 +753,11 @@ static void rtl8168_mac_loopback_test(struct rtl8168_private *tp)
 	RTL_W32(TxConfig, (RTL_R32(TxConfig) & ~0x00060000) | 0x00020000);
 
 	do {
-		skb = dev_alloc_skb(len + NET_IP_ALIGN);
+		skb = dev_alloc_skb(len + RTK_RX_ALIGN);
 		if (unlikely(!skb))
 			dev_printk(KERN_NOTICE, &tp->pci_dev->dev, "-ENOMEM;\n");
 	} while (unlikely(skb == NULL));
-	skb_reserve(skb, NET_IP_ALIGN);
+	skb_reserve(skb, RTK_RX_ALIGN);
 
 	memcpy(skb_put(skb, dev->addr_len), dev->dev_addr, dev->addr_len);
 	memcpy(skb_put(skb, dev->addr_len), dev->dev_addr, dev->addr_len);
@@ -1703,6 +1709,7 @@ rtl8168_tx_vlan_tag(struct rtl8168_private *tp,
 }
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
+
 static void
 rtl8168_vlan_rx_register(struct net_device *dev,
 			 struct vlan_group *grp)
@@ -1721,40 +1728,7 @@ rtl8168_vlan_rx_register(struct net_device *dev,
 	RTL_R16(CPlusCmd);
 	spin_unlock_irqrestore(&tp->lock, flags);
 }
-#else
-static u32 rtl8168_fix_features(struct net_device *dev, u32 features)
-{
-	if (dev->mtu > MSSMask)
-		features &= ~NETIF_F_ALL_TSO;
 
-	return features;
-}
-
-static int rtl8168_set_features(struct net_device *dev, u32 features)
-{
-	struct rtl8168_private *tp = netdev_priv(dev);
-	void __iomem *ioaddr = tp->mmio_addr;
-	unsigned long flags;
-
-	spin_lock_irqsave(&tp->lock, flags);
-
-	if (features & NETIF_F_RXCSUM)
-		tp->cp_cmd |= RxChkSum;
-	else
-		tp->cp_cmd &= ~RxChkSum;
-
-	if (dev->features & NETIF_F_HW_VLAN_RX)
-		tp->cp_cmd |= RxVlan;
-	else
-		tp->cp_cmd &= ~RxVlan;
-
-	RTL_W16(CPlusCmd, tp->cp_cmd);
-	RTL_R16(CPlusCmd);
-
-	spin_unlock_irqrestore(&tp->lock, flags);
-
-	return 0;
-}
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
@@ -1814,6 +1788,44 @@ rtl8168_rx_vlan_skb(struct rtl8168_private *tp,
 		    struct sk_buff *skb)
 {
 	return -1;
+}
+
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+
+static u32 rtl8168_fix_features(struct net_device *dev, u32 features)
+{
+	if (dev->mtu > MSSMask)
+		features &= ~NETIF_F_ALL_TSO;
+
+	return features;
+}
+
+static int rtl8168_set_features(struct net_device *dev, u32 features)
+{
+	struct rtl8168_private *tp = netdev_priv(dev);
+	void __iomem *ioaddr = tp->mmio_addr;
+	unsigned long flags;
+
+	spin_lock_irqsave(&tp->lock, flags);
+
+	if (features & NETIF_F_RXCSUM)
+		tp->cp_cmd |= RxChkSum;
+	else
+		tp->cp_cmd &= ~RxChkSum;
+
+	if (dev->features & NETIF_F_HW_VLAN_RX)
+		tp->cp_cmd |= RxVlan;
+	else
+		tp->cp_cmd &= ~RxVlan;
+
+	RTL_W16(CPlusCmd, tp->cp_cmd);
+	RTL_R16(CPlusCmd);
+
+	spin_unlock_irqrestore(&tp->lock, flags);
+
+	return 0;
 }
 
 #endif
@@ -3820,7 +3832,7 @@ rtl8168_hw_phy_config(struct net_device *dev)
 		gphy_val = mdio_read(tp, 0x0D);
 		gphy_val |= BIT_5;
 		mdio_write(tp, 0x0D, gphy_val);
-	} else if (tp->mcfg == CFG_METHOD_12) {
+	} else if (tp->mcfg == CFG_METHOD_12 || tp->mcfg == CFG_METHOD_13) {
 		// TO DO:
 		mdio_write(tp, 0x1F, 0x0001);
 		mdio_write(tp, 0x17, 0x0CC0);
@@ -3828,13 +3840,16 @@ rtl8168_hw_phy_config(struct net_device *dev)
 		mdio_write(tp, 0x1F, 0x0007);
 		mdio_write(tp, 0x1E, 0x002D);
 		mdio_write(tp, 0x18, 0x0040);
-		mdio_write(tp, 0x1F, 0x0000);
 
+		mdio_write(tp, 0x1F, 0x0000);
 		gphy_val = mdio_read(tp, 0x0D);
 		gphy_val |= BIT_5;
 		mdio_write(tp, 0x0D, gphy_val);
-	} else if (tp->mcfg == CFG_METHOD_13) {
-		// TO DO:
+
+		mdio_write(tp, 0x1F, 0x0002);
+		gphy_val = mdio_read(tp, 0x0C);
+		gphy_val |= BIT_10;
+		mdio_write(tp, 0x0C, gphy_val);
 	} else if (tp->mcfg == CFG_METHOD_14 || tp->mcfg == CFG_METHOD_15) {
 		struct pci_dev *pdev = tp->pci_dev;
 
@@ -11486,7 +11501,13 @@ rtl8168_release_board(struct pci_dev *pdev,
 		      struct net_device *dev,
 		      void __iomem *ioaddr)
 {
+	struct rtl8168_private *tp = netdev_priv(dev);
+
 	rtl8168_phy_power_down(dev);
+
+	/* restore the original MAC address */
+	rtl8168_rar_set(tp, tp->org_mac_addr);
+
 	iounmap(ioaddr);
 	pci_release_regions(pdev);
 	pci_disable_device(pdev);
@@ -11511,9 +11532,8 @@ rtl8168_set_mac_address(struct net_device *dev,
 		return -EADDRNOTAVAIL;
 
 	memcpy(dev->dev_addr, addr->sa_data, dev->addr_len);
-	memcpy(tp->mac_addr, addr->sa_data, dev->addr_len);
 
-	rtl8168_rar_set(tp, tp->mac_addr, 0);
+	rtl8168_rar_set(tp, dev->dev_addr);
 
 	return 0;
 }
@@ -11523,12 +11543,10 @@ rtl8168_set_mac_address(struct net_device *dev,
  *
  * tp - The private data structure for driver
  * addr - Address to put into receive address register
- * index - Receive address register to write
  *****************************************************************************/
 void
 rtl8168_rar_set(struct rtl8168_private *tp,
-		uint8_t *addr,
-		uint32_t index)
+		uint8_t *addr)
 {
 	void __iomem *ioaddr = tp->mmio_addr;
 	uint32_t rar_low = 0;
@@ -11545,6 +11563,14 @@ rtl8168_rar_set(struct rtl8168_private *tp,
 	RTL_W8(Cfg9346, Cfg9346_Unlock);
 	RTL_W32(MAC0, rar_low);
 	RTL_W32(MAC4, rar_high);
+
+	if (tp->mcfg == CFG_METHOD_17) {
+		rtl8168_eri_write(ioaddr, 0xe0, 4, rar_low, ERIAR_ExGMAC);
+		rtl8168_eri_write(ioaddr, 0xe4, 4, rar_high, ERIAR_ExGMAC);
+		rtl8168_eri_write(ioaddr, 0xf0, 4, rar_low << 16, ERIAR_ExGMAC);
+		rtl8168_eri_write(ioaddr, 0xf4, 4, rar_low >> 16 | rar_high << 16, ERIAR_ExGMAC);
+	}
+
 	RTL_W8(Cfg9346, Cfg9346_Lock);
 }
 
@@ -12628,7 +12654,7 @@ static void rtl8168_disable_msi(struct pci_dev *pdev, struct rtl8168_private *tp
 	}
 }
 
-#ifdef HAVE_NET_DEVICE_OPS
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
 static const struct net_device_ops rtl8168_netdev_ops = {
 	.ndo_open		= rtl8168_open,
 	.ndo_stop		= rtl8168_close,
@@ -12655,7 +12681,7 @@ static const struct net_device_ops rtl8168_netdev_ops = {
 	.ndo_poll_controller	= rtl8168_netpoll,
 #endif
 };
-#endif //HAVE_NET_DEVICE_OPS
+#endif
 
 static int __devinit
 rtl8168_init_one(struct pci_dev *pdev,
@@ -12754,9 +12780,9 @@ rtl8168_init_one(struct pci_dev *pdev,
 #endif
 
 	dev->features |= NETIF_F_IP_CSUM;
+	tp->cp_cmd |= RTL_R16(CPlusCmd);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	tp->cp_cmd |= RxChkSum;
-	tp->cp_cmd |= RTL_R16(CPlusCmd);
 #else
 	dev->features |= NETIF_F_RXCSUM;
 	dev->hw_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
@@ -13234,14 +13260,6 @@ rtl8168_hw_start(struct net_device *dev)
 			//tx checksum offload enable
 			dev->features |= NETIF_F_IP_CSUM;
 		}
-
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
 	} else if (tp->mcfg == CFG_METHOD_8) {
 
 		set_offset70F(tp, 0x27);
@@ -13279,13 +13297,6 @@ rtl8168_hw_start(struct net_device *dev)
 			dev->features |= NETIF_F_IP_CSUM;
 		}
 
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
 	} else if (tp->mcfg == CFG_METHOD_9) {
 		set_offset70F(tp, 0x27);
 
@@ -13314,14 +13325,6 @@ rtl8168_hw_start(struct net_device *dev)
 			/* tx checksum offload enable */
 			dev->features |= NETIF_F_IP_CSUM;
 		}
-
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
 
 		/* set EPHY registers */
 		rtl8168_ephy_write(ioaddr, 0x01, 0x7C7D);
@@ -13353,14 +13356,6 @@ rtl8168_hw_start(struct net_device *dev)
 			/* tx checksum offload enable */
 			dev->features |= NETIF_F_IP_CSUM;
 		}
-
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
 
 		RTL_W8(Config1, RTL_R8(Config1) | 0x10);
 
@@ -13395,14 +13390,6 @@ rtl8168_hw_start(struct net_device *dev)
 			dev->features |= NETIF_F_IP_CSUM;
 		}
 
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
-
 		pci_write_config_byte(pdev, 0x81, 0x00);
 
 		RTL_W8(Config1, RTL_R8(Config1) | 0x10);
@@ -13423,14 +13410,6 @@ rtl8168_hw_start(struct net_device *dev)
 			/* tx checksum offload enable */
 			dev->features |= NETIF_F_IP_CSUM;
 		}
-
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
 
 		ephy_data = rtl8168_ephy_read(ioaddr, 0x0B);
 		rtl8168_ephy_write(ioaddr, 0x0B, ephy_data|0x48);
@@ -13518,14 +13497,6 @@ rtl8168_hw_start(struct net_device *dev)
 			dev->features |= NETIF_F_IP_CSUM;
 		}
 
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
-
 		rtl8168_set_rxbufsize(tp, dev);
 
 
@@ -13610,14 +13581,6 @@ rtl8168_hw_start(struct net_device *dev)
 			dev->features |= NETIF_F_IP_CSUM;
 		}
 
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
-
 		rtl8168_set_rxbufsize(tp, dev);
 
 		/* disable clock request. */
@@ -13673,21 +13636,15 @@ rtl8168_hw_start(struct net_device *dev)
 			dev->features |= NETIF_F_IP_CSUM;
 		}
 
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
-
 		rtl8168_set_rxbufsize(tp, dev);
 
 		RTL_W8(0xD0, RTL_R8(0xD0) | BIT_6);
 		RTL_W8(0xF2, RTL_R8(0xF2) | BIT_6);
 		rtl8168_eri_write(ioaddr, 0xC0, 2, 0x00000000, ERIAR_ExGMAC);
 		rtl8168_eri_write(ioaddr, 0xB8, 2, 0x00000000, ERIAR_ExGMAC);
-		rtl8168_eri_write(ioaddr, 0xD5, 1, 0x0000000C, ERIAR_ExGMAC);
+		csi_tmp = rtl8168_eri_read(ioaddr, 0xD5, 1, ERIAR_ExGMAC);
+		csi_tmp |= BIT_3 | BIT_2;
+		rtl8168_eri_write(ioaddr, 0xD5, 1, csi_tmp, ERIAR_ExGMAC);
 		RTL_W8(0x1B,RTL_R8(0x1B) & ~0x07);
 
 		csi_tmp = rtl8168_eri_read(ioaddr, 0x1B0, 1, ERIAR_ExGMAC);
@@ -13743,7 +13700,7 @@ rtl8168_hw_start(struct net_device *dev)
 		rtl8168_ephy_write(ioaddr, 0x19, ephy_data);
 
 		RTL_W8(Config5, RTL_R8(Config5) | BIT_0);
-		RTL_W8(Config2, RTL_R8(Config2) | BIT_5 | BIT_7);
+		RTL_W8(Config2, RTL_R8(Config2) | BIT_7);
 
 		tp->cp_cmd &= 0x2063;
 		if (dev->mtu > ETH_DATA_LEN) {
@@ -13758,21 +13715,15 @@ rtl8168_hw_start(struct net_device *dev)
 			dev->features |= NETIF_F_IP_CSUM;
 		}
 
-		//rx checksum offload enable
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-		tp->cp_cmd |= RxChkSum;
-		RTL_W16(CPlusCmd, tp->cp_cmd);
-#else
-		dev->features |= NETIF_F_RXCSUM;
-#endif
-
 		rtl8168_set_rxbufsize(tp, dev);
 
 		RTL_W8(0xD0, RTL_R8(0xD0) | BIT_6);
 		RTL_W8(0xF2, RTL_R8(0xF2) | BIT_6);
 		rtl8168_eri_write(ioaddr, 0xC0, 2, 0x00000000, ERIAR_ExGMAC);
 		rtl8168_eri_write(ioaddr, 0xB8, 2, 0x00000000, ERIAR_ExGMAC);
-		rtl8168_eri_write(ioaddr, 0xD5, 1, 0x0000000C, ERIAR_ExGMAC);
+		csi_tmp = rtl8168_eri_read(ioaddr, 0xD5, 1, ERIAR_ExGMAC);
+		csi_tmp |= BIT_3 | BIT_2;
+		rtl8168_eri_write(ioaddr, 0xD5, 1, csi_tmp, ERIAR_ExGMAC);
 
 		csi_tmp = rtl8168_eri_read(ioaddr, 0x1B0, 1, ERIAR_ExGMAC);
 		csi_tmp |= BIT_4;
@@ -13860,7 +13811,9 @@ rtl8168_hw_start(struct net_device *dev)
 		tp->tx_ip_csum_cmd = TxIPCS_C;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
+	RTL_W16(CPlusCmd, tp->cp_cmd);
+#else
 	rtl8168_set_features(dev, dev->features);
 #endif
 
@@ -14007,11 +13960,11 @@ rtl8168_alloc_rx_skb(struct pci_dev *pdev,
 	dma_addr_t mapping;
 	int ret = 0;
 
-	skb = dev_alloc_skb(rx_buf_sz + NET_IP_ALIGN);
+	skb = dev_alloc_skb(rx_buf_sz + RTK_RX_ALIGN);
 	if (!skb)
 		goto err_out;
 
-	skb_reserve(skb, NET_IP_ALIGN);
+	skb_reserve(skb, RTK_RX_ALIGN);
 	*sk_buff = skb;
 
 	mapping = pci_map_single(pdev, skb->data, rx_buf_sz,
@@ -14443,7 +14396,7 @@ rtl8168_start_xmit(struct sk_buff *skb,
 
 	if ((tp->mcfg == CFG_METHOD_16|| tp->mcfg == CFG_METHOD_17)&& len < 60) {
 		if (opts2 & 0xE0000000) {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) && LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 			skb_checksum_help(skb, 0);
 #else
 			skb_checksum_help(skb);
@@ -14984,9 +14937,6 @@ static void rtl8168_down(struct net_device *dev)
 			break;
 	}
 
-	/* restore the original MAC address */
-	rtl8168_rar_set(tp, tp->org_mac_addr, 0);
-
 	rtl8168_tx_clear(tp);
 
 	rtl8168_rx_clear(tp);
@@ -15021,6 +14971,9 @@ static void rtl8168_shutdown(struct pci_dev *pdev)
 {
 	struct net_device *dev = pci_get_drvdata(pdev);
 	struct rtl8168_private *tp = netdev_priv(dev);
+
+	/* restore the original MAC address */
+	rtl8168_rar_set(tp, tp->org_mac_addr);
 
 	rtl8168_close(dev);
 	rtl8168_disable_msi(pdev, tp);
@@ -15182,6 +15135,9 @@ rtl8168_resume(struct pci_dev *pdev)
 	pci_restore_state(pdev);
 #endif
 	pci_enable_wake(pdev, PCI_D0, 0);
+
+	/* restore last modified mac address */
+	rtl8168_rar_set(tp, dev->dev_addr);
 
 	if (!netif_running(dev))
 		goto out;
