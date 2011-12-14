@@ -2,6 +2,7 @@ r8168 (8.026.00-2) UNRELEASED; urgency=low
 
   * Move git repository to git://git.debian.org/git/collab-maint/r8168.git
   * Add Dmitry Smirnov to Uploaders.
+  * Work around dkms bug #651973 by adding BUILT_MODULE_NAME to dkms.conf.
 
  -- Andreas Beckmann <debian@abeckmann.de>  Thu, 01 Dec 2011 22:47:17 +0100
 
