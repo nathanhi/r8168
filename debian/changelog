@@ -1,4 +1,4 @@
-r8168 (8.027.00-1) UNRELEASED; urgency=low
+r8168 (8.027.00-1) unstable; urgency=low
 
   * New upstream release 8.027.00 (2011-12-01).
   * Move git repository to git://git.debian.org/git/collab-maint/r8168.git
@@ -6,7 +6,7 @@ r8168 (8.027.00-1) UNRELEASED; urgency=low
   * Work around dkms bug #651973 by adding BUILT_MODULE_NAME to dkms.conf.
   * Remove executable permission from module source code.
 
- -- Andreas Beckmann <debian@abeckmann.de>  Wed, 14 Dec 2011 13:39:57 +0100
+ -- Andreas Beckmann <debian@abeckmann.de>  Wed, 14 Dec 2011 18:13:15 +0100
 
 r8168 (8.026.00-1) unstable; urgency=low
 
