@@ -1,6 +1,7 @@
 r8168 (8.028.00-1) UNRELEASED; urgency=low
 
   * New upstream release 8.028.00 (2012-02-03).
+  * Drop 001_build-with-kernel-3.2.x.diff, fixed upstream.
 
  -- Andreas Beckmann <debian@abeckmann.de>  Fri, 17 Feb 2012 11:07:54 +0100
 
