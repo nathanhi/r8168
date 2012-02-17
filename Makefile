@@ -47,7 +47,7 @@ ifeq ($(KFLAG),24x)
 else
 	$(MAKE) -C src/ clean
 endif
-                                                                                                                             
+
 install:
 ifeq ($(KFLAG),24x)
 	$(MAKE) -C src/ -f Makefile_linux24x install

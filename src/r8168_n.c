@@ -72,6 +72,11 @@
 static int eee_enable = 0 ;
 module_param(eee_enable, int, S_IRUGO);
 
+#ifdef CONFIG_DOWN_SPEED_100
+static int config_down_speed_100 = 1;
+#else
+static int config_down_speed_100 = 0;
+#endif
 
 /* Maximum events (Rx packets, etc.) to handle at each interrupt. */
 static const int max_interrupt_work = 20;
@@ -207,7 +212,13 @@ static const struct {
 	   CFG_METHOD_20,
 	   RxCfg_128_int_en | (RX_DMA_BURST << RxCfgDMAShift),
 	   0xff7e1880,
-	   Jumbo_Frame_9k)
+	   Jumbo_Frame_9k),
+
+	_R("Unknown",
+	   CFG_METHOD_DEFAULT,
+	   RxCfg_128_int_en | (RX_DMA_BURST << RxCfgDMAShift),
+	   0xff7e1880,
+	   RX_BUF_SIZE)
 };
 #undef _R
 
@@ -1078,20 +1089,33 @@ rtl8168_nic_reset(struct net_device *dev)
 		~(AcceptErr | AcceptRunt | AcceptBroadcast | AcceptMulticast |
 		  AcceptMyPhys |  AcceptAllPhys));
 
-	if (tp->mcfg == CFG_METHOD_11 || tp->mcfg == CFG_METHOD_12 ||
-	    tp->mcfg == CFG_METHOD_13) {
-		while (RTL_R8(TxPoll) & NPQ)
-			udelay(20);
-	} else if (tp->mcfg == CFG_METHOD_16 || tp->mcfg == CFG_METHOD_17 ||
-		   tp->mcfg == CFG_METHOD_18 || tp->mcfg == CFG_METHOD_19 ||
-		   tp->mcfg == CFG_METHOD_20) {
-		RTL_W8(ChipCmd, StopReq | CmdRxEnb | CmdTxEnb);
-		while (!(RTL_R32(TxConfig) & BIT_11)) udelay(100);
-	} else if ((tp->mcfg != CFG_METHOD_1) &&
-		   (tp->mcfg != CFG_METHOD_2) &&
-		   (tp->mcfg != CFG_METHOD_3)) {
+	switch (tp->mcfg) {
+	case CFG_METHOD_1:
+	case CFG_METHOD_2:
+	case CFG_METHOD_3:
+		break;
+	case CFG_METHOD_4:
+	case CFG_METHOD_5:
+	case CFG_METHOD_6:
+	case CFG_METHOD_7:
+	case CFG_METHOD_8:
+	case CFG_METHOD_9:
+	case CFG_METHOD_10:
+	case CFG_METHOD_14:
+	case CFG_METHOD_15:
 		RTL_W8(ChipCmd, StopReq | CmdRxEnb | CmdTxEnb);
 		udelay(100);
+		break;
+	case CFG_METHOD_11:
+	case CFG_METHOD_12:
+	case CFG_METHOD_13:
+		while (RTL_R8(TxPoll) & NPQ)
+			udelay(20);
+		break;
+	default:
+		RTL_W8(ChipCmd, StopReq | CmdRxEnb | CmdTxEnb);
+		while (!(RTL_R32(TxConfig) & BIT_11)) udelay(100);
+		break;
 	}
 
 	/* Soft reset the chip. */
@@ -1320,6 +1344,8 @@ rtl8168_powerdown_pll(struct net_device *dev)
 	struct rtl8168_private *tp = netdev_priv(dev);
 	void __iomem *ioaddr = tp->mmio_addr;
 	unsigned long flags;
+	int auto_nego = 0;
+	int giga_ctrl = 0;
 
 	if ((tp->mcfg == CFG_METHOD_11 || tp->mcfg == CFG_METHOD_12 ||
 	     tp->mcfg == CFG_METHOD_13) && rtl8168_check_dash(tp))
@@ -1361,7 +1387,18 @@ rtl8168_powerdown_pll(struct net_device *dev)
 	if (tp->wol_enabled == WOL_ENABLED) {
 		spin_lock_irqsave(&tp->phy_lock, flags);
 		mdio_write(tp, 0x1F, 0x0000);
-		mdio_write(tp, 0x00, 0x0000);
+		auto_nego = mdio_read(tp, MII_ADVERTISE);
+		auto_nego &= ~(ADVERTISE_10HALF | ADVERTISE_10FULL
+				| ADVERTISE_100HALF | ADVERTISE_100FULL);
+		if (config_down_speed_100)
+			auto_nego |= ADVERTISE_100FULL;
+		else
+			auto_nego |= ADVERTISE_10HALF;
+
+		giga_ctrl = mdio_read(tp, MII_CTRL1000) & ~(ADVERTISE_1000HALF | ADVERTISE_1000FULL);
+		mdio_write(tp, MII_ADVERTISE, auto_nego);
+		mdio_write(tp, MII_CTRL1000, giga_ctrl);
+		mdio_write(tp, MII_BMCR, BMCR_RESET | BMCR_ANENABLE | BMCR_ANRESTART);
 		spin_unlock_irqrestore(&tp->phy_lock, flags);
 		RTL_W32(RxConfig, RTL_R32(RxConfig) | AcceptBroadcast | AcceptMulticast | AcceptMyPhys);
 		return;
@@ -1419,7 +1456,12 @@ rtl8168_get_wol(struct net_device *dev,
 	wol->wolopts = 0;
 
 #define WAKE_ANY (WAKE_PHY | WAKE_MAGIC | WAKE_UCAST | WAKE_BCAST | WAKE_MCAST)
+	if (tp->mcfg == CFG_METHOD_DEFAULT) {
+		wol->supported = 0;
+		return;
+	} else {
 	wol->supported = WAKE_ANY;
+	}
 
 	spin_lock_irq(&tp->lock);
 
@@ -1473,6 +1515,9 @@ rtl8168_set_wol(struct net_device *dev,
 		{ WAKE_MAGIC, Config3, MagicPacket },
 	};
 
+	if (tp->mcfg == CFG_METHOD_DEFAULT)
+		return -EOPNOTSUPP;
+
 	spin_lock_irq(&tp->lock);
 
 	RTL_W8(Cfg9346, Cfg9346_Unlock);
@@ -1481,17 +1526,14 @@ rtl8168_set_wol(struct net_device *dev,
 		tmp = ARRAY_SIZE(cfg) - 1;
 
 		csi_tmp = rtl8168_eri_read(ioaddr, 0xDE, 4, ERIAR_ExGMAC);
-		csi_tmp &=~ BIT_0;
-		rtl8168_eri_write(ioaddr, 0xD0, 4, csi_tmp, ERIAR_ExGMAC);
-
-		if (wol->wolopts &WAKE_MAGIC) {
-			csi_tmp = rtl8168_eri_read(ioaddr, 0xDE, 4, ERIAR_ExGMAC);
+		if (wol->wolopts & WAKE_MAGIC)
 			csi_tmp |= BIT_0;
-			rtl8168_eri_write(ioaddr, 0xD0, 4, csi_tmp, ERIAR_ExGMAC);
-		}
-
-	} else
+		else
+			csi_tmp &=~ BIT_0;
+		rtl8168_eri_write(ioaddr, 0xDE, 4, csi_tmp, ERIAR_ExGMAC);
+	} else {
 		tmp = ARRAY_SIZE(cfg);
+	}
 
 	for (i = 0; i < tmp; i++) {
 		u8 options = RTL_R8(cfg[i].reg) & ~cfg[i].mask;
@@ -1668,6 +1710,11 @@ static int
 rtl8168_set_tx_csum(struct net_device *dev,
 		    u32 data)
 {
+	struct rtl8168_private *tp = netdev_priv(dev);
+	
+	if (tp->mcfg == CFG_METHOD_DEFAULT)
+		return -EOPNOTSUPP;
+
 	if (data)
 		dev->features |= NETIF_F_IP_CSUM;
 	else
@@ -1683,6 +1730,9 @@ rtl8168_set_rx_csum(struct net_device *dev,
 	struct rtl8168_private *tp = netdev_priv(dev);
 	void __iomem *ioaddr = tp->mmio_addr;
 	unsigned long flags;
+
+	if (tp->mcfg == CFG_METHOD_DEFAULT)
+		return -EOPNOTSUPP;
 
 	spin_lock_irqsave(&tp->lock, flags);
 
@@ -1704,7 +1754,11 @@ static inline u32
 rtl8168_tx_vlan_tag(struct rtl8168_private *tp,
 		    struct sk_buff *skb)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	return (tp->vlgrp && vlan_tx_tag_present(skb)) ?
+#else
+	return (vlan_tx_tag_present(skb)) ?
+#endif
 		TxVlanTag | swab16(vlan_tx_tag_get(skb)) : 0x00;
 }
 
@@ -1756,19 +1810,19 @@ rtl8168_rx_vlan_skb(struct rtl8168_private *tp,
 		    struct sk_buff *skb)
 {
 	u32 opts2 = le32_to_cpu(desc->opts2);
-	int ret;
+	int ret = -1;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,1,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	if (tp->vlgrp && (opts2 & RxVlanTag)) {
 		rtl8168_rx_hwaccel_skb(skb, tp->vlgrp,
 				       swab16(opts2 & 0xffff));
+		ret = 0;
+	}
 #else
-	if (opts2 & RxVlanTag) {
+	if (opts2 & RxVlanTag)
 		__vlan_hwaccel_put_tag(skb, swab16(opts2 & 0xffff));
 #endif
-		ret = 0;
-	} else
-		ret = -1;
+
 	desc->opts2 = 0;
 	return ret;
 }
@@ -1880,9 +1934,6 @@ static void rtl8168_gset_xmii(struct net_device *dev,
 	cmd->duplex = ((status & _1000bpsF) || (status & FullDup)) ?
 		      DUPLEX_FULL : DUPLEX_HALF;
 
-	tp->autoneg = cmd->autoneg;
-	tp->speed = cmd->speed;
-	tp->duplex = cmd->duplex;
 
 }
 
@@ -2158,6 +2209,11 @@ u32 _kc_ethtool_op_get_sg(struct net_device *dev)
 #define ethtool_op_set_sg _kc_ethtool_op_set_sg
 int _kc_ethtool_op_set_sg(struct net_device *dev, u32 data)
 {
+	struct rtl8168_private *tp = netdev_priv(dev);
+	
+	if (tp->mcfg == CFG_METHOD_DEFAULT)
+		return -EOPNOTSUPP;
+
 #ifdef NETIF_F_SG
 	if (data)
 		dev->features |= NETIF_F_SG;
@@ -2214,8 +2270,7 @@ static int rtl8168_enable_EEE(struct rtl8168_private *tp)
 	__u16	data;
 
 	ret = 0;
-	switch (tp->mcfg)
-	{
+	switch (tp->mcfg) {
 	case CFG_METHOD_14:
 	case CFG_METHOD_15:
 		spin_lock_irqsave(&tp->phy_lock, flags);
@@ -2314,8 +2369,7 @@ static int rtl8168_disable_EEE(struct rtl8168_private *tp)
 	__u16	data;
 
 	ret = 0;
-	switch (tp->mcfg)
-	{
+	switch (tp->mcfg) {
 	case CFG_METHOD_14:
 	case CFG_METHOD_15:
 		spin_lock_irqsave(&tp->phy_lock, flags);
@@ -2405,25 +2459,92 @@ static int rtl8168_disable_EEE(struct rtl8168_private *tp)
 	return ret;
 }
 
+static int rtl8168_green_table(struct rtl8168_private *tp)
+{
+	struct pci_dev *pdev = tp->pci_dev;
+	unsigned long flags;
+	u16 gphy_val;
+	int i;
+	static const u16 evl_phy_value[] = {
+		0x8B56, 0x8B5F, 0x8B68, 0x8B71,
+		0x8B7A, 0x8A7B, 0x8A7E, 0x8A81,
+		0x8A84, 0x8A87
+	};
+	
+	switch (tp->mcfg) {
+	case CFG_METHOD_16:
+	case CFG_METHOD_17:
+		if (pdev->subsystem_vendor == 0x1043 &&
+		    pdev->subsystem_device == 0x13F7) {
+			spin_lock_irqsave(&tp->phy_lock, flags);
+			mdio_write(tp, 0x1F, 0x0005);
+			for (i=0; i < ARRAY_SIZE(evl_phy_value); i++) {
+				mdio_write(tp, 0x05, evl_phy_value[i]);
+				gphy_val = (0xAA << 8) | (mdio_read(tp, 0x06) & 0xFF);
+				mdio_write(tp, 0x06, gphy_val);
+			}
+			mdio_write(tp, 0x1F, 0x0007);
+			mdio_write(tp, 0x1E, 0x0078);
+			mdio_write(tp, 0x17, 0x51AA);		
+			mdio_write(tp, 0x1F, 0x0000);
+			spin_unlock_irqrestore(&tp->phy_lock, flags);			
+		}
+		break;
+	default:
+		break;
+	}
+
+	switch (tp->mcfg) {
+	case CFG_METHOD_16:
+	case CFG_METHOD_17:
+	case CFG_METHOD_18:
+	case CFG_METHOD_19:
+	case CFG_METHOD_20:
+		spin_lock_irqsave(&tp->phy_lock, flags);
+		mdio_write(tp, 0x1f, 0x0005);
+		mdio_write(tp, 0x05, 0x8B54);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) & BIT_11);
+		mdio_write(tp, 0x05, 0x8B5D);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) & BIT_11);
+		mdio_write(tp, 0x05, 0x8A7C);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) & BIT_8);
+		mdio_write(tp, 0x05, 0x8A7F);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) | BIT_8);
+		mdio_write(tp, 0x05, 0x8A82);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) & BIT_8);
+		mdio_write(tp, 0x05, 0x8A85);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) & BIT_8);
+		mdio_write(tp, 0x05, 0x8A88);
+		mdio_write(tp, 0x06, mdio_read(tp, 0x06) & BIT_8);
+		mdio_write(tp, 0x1f, 0x0000);
+		spin_unlock_irqrestore(&tp->phy_lock, flags);
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
 #if 0
 
 static int rtl8168_enable_green_feature(struct rtl8168_private *tp)
 {
-	__u16	data;
+	unsigned long flags;
+	u16 gphy_val;
 
-	switch (tp->mcfg)
-	{
+	switch (tp->mcfg) {
 	case CFG_METHOD_14:
 	case CFG_METHOD_15:
 		spin_lock_irqsave(&tp->phy_lock, flags);
 		mdio_write(tp, 0x1F, 0x0003);
-		data = mdio_read(tp, 0x10) | 0x0400;
-		mdio_write(tp, 0x10, data);
-		data = mdio_read(tp, 0x19) | 0x0001;
-		mdio_write(tp, 0x19, data);
+		gphy_val = mdio_read(tp, 0x10) | 0x0400;
+		mdio_write(tp, 0x10, gphy_val);
+		gphy_val = mdio_read(tp, 0x19) | 0x0001;
+		mdio_write(tp, 0x19, gphy_val);
 		mdio_write(tp, 0x1F, 0x0005);
-		data = mdio_read(tp, 0x01) & ~0x0100;
-		mdio_write(tp, 0x01, data);
+		gphy_val = mdio_read(tp, 0x01) & ~0x0100;
+		mdio_write(tp, 0x01, gphy_val);
 		mdio_write(tp, 0x1F, 0x0000);
 		mdio_write(tp, 0x00, 0x9200);
 		mdelay(20);
@@ -2461,28 +2582,28 @@ static int rtl8168_enable_green_feature(struct rtl8168_private *tp)
 
 static int rtl8168_disable_green_feature(struct rtl8168_private *tp)
 {
-	__u16	data;
+	unsigned long flags;
+	u16 gphy_val;
 
-	switch (tp->mcfg)
-	{
+	switch (tp->mcfg) {
 	case CFG_METHOD_14:
 	case CFG_METHOD_15:
 		spin_lock_irqsave(&tp->phy_lock, flags);
 		mdio_write(tp, 0x1F, 0x0005);
-		data = mdio_read(tp, 0x01) | 0x0100;
-		mdio_write(tp, 0x01, data);
+		gphy_val = mdio_read(tp, 0x01) | 0x0100;
+		mdio_write(tp, 0x01, gphy_val);
 		mdio_write(tp, 0x1F, 0x0003);
-		data = mdio_read(tp, 0x10) & ~0x0400;
-		mdio_write(tp, 0x10, data);
-		data = mdio_read(tp, 0x19) & ~0x0001;
-		mdio_write(tp, 0x19, data);
+		gphy_val = mdio_read(tp, 0x10) & ~0x0400;
+		mdio_write(tp, 0x10, gphy_val);
+		gphy_val = mdio_read(tp, 0x19) & ~0x0001;
+		mdio_write(tp, 0x19, gphy_val);
 		mdio_write(tp, 0x1F, 0x0002);
-		data = mdio_read(tp, 0x06) & ~0x7000;
-		data |= 0x3000;
-		mdio_write(tp, 0x06, data);
-		data = mdio_read(tp, 0x0D) & 0x0700;
-		data |= 0x0500;
-		mdio_write(tp, 0x0D, data);
+		gphy_val = mdio_read(tp, 0x06) & ~0x7000;
+		gphy_val |= 0x3000;
+		mdio_write(tp, 0x06, gphy_val);
+		gphy_val = mdio_read(tp, 0x0D) & 0x0700;
+		gphy_val |= 0x0500;
+		mdio_write(tp, 0x0D, gphy_val);
 		mdio_write(tp, 0x1F, 0x0000);
 		spin_unlock_irqrestore(&tp->phy_lock, flags);
 		break;
@@ -2513,7 +2634,7 @@ static int rtl8168_disable_green_feature(struct rtl8168_private *tp)
 
 #endif
 
-static int rtl8168_get_mac_version(struct rtl8168_private *tp, void __iomem *ioaddr)
+static void rtl8168_get_mac_version(struct rtl8168_private *tp, void __iomem *ioaddr)
 {
 	u32 reg,val32;
 	u32 ICVerID;
@@ -2522,92 +2643,93 @@ static int rtl8168_get_mac_version(struct rtl8168_private *tp, void __iomem *ioa
 	reg = val32 & 0x7c800000;
 	ICVerID = val32 & 0x00700000;
 
-	tp->mcfg = CFG_METHOD_UNKNOWN;
 	switch (reg) {
-		case 0x30000000:
-			tp->mcfg = CFG_METHOD_1;
-			tp->efuse = EFUSE_NOT_SUPPORT;
-			return 0;
-		case 0x38000000:
-			if (ICVerID == 0x00000000) {
-				tp->mcfg = CFG_METHOD_2;
-			} else if (ICVerID == 0x00500000) {
-				tp->mcfg = CFG_METHOD_3;
-			} else {
-				tp->mcfg = CFG_METHOD_3;
-			}
-			tp->efuse = EFUSE_NOT_SUPPORT;
-			return 0;
-		case 0x3C000000:
-			if (ICVerID == 0x00000000) {
-				tp->mcfg = CFG_METHOD_4;
-			} else if (ICVerID == 0x00200000) {
-				tp->mcfg = CFG_METHOD_5;
-			} else if (ICVerID == 0x00400000) {
-				tp->mcfg = CFG_METHOD_6;
-			} else {
-				tp->mcfg = CFG_METHOD_6;
-			}
-			tp->efuse = EFUSE_NOT_SUPPORT;
-			return 0;
-		case 0x3C800000:
-			if (ICVerID == 0x00100000){
-				tp->mcfg = CFG_METHOD_7;
-			} else if (ICVerID == 0x00300000){
-				tp->mcfg = CFG_METHOD_8;
-			} else {
-				tp->mcfg = CFG_METHOD_8;
-			}
-			tp->efuse = EFUSE_NOT_SUPPORT;
-			return 0;
-		case 0x28000000:
-			if (ICVerID == 0x00100000) {
-				tp->mcfg = CFG_METHOD_9;
-			} else if (ICVerID == 0x00300000) {
-				tp->mcfg = CFG_METHOD_10;
-			} else {
-				tp->mcfg = CFG_METHOD_10;
-			}
-			tp->efuse = EFUSE_SUPPORT;
-			return 0;
-		case 0x28800000:
-			if (ICVerID == 0x00000000)
-				tp->mcfg = CFG_METHOD_11;
-			else if (ICVerID == 0x00200000) {
-				tp->mcfg = CFG_METHOD_12;
-				RTL_W32(0xD0, RTL_R32(0xD0) | 0x00020000);
-			} else// if (ICVerID == 0x00300000)
-				tp->mcfg = CFG_METHOD_13;
-			tp->efuse = EFUSE_SUPPORT;
-			return 0;
-		case 0x2C000000:
-			if (ICVerID == 0x00100000)
-				tp->mcfg = CFG_METHOD_14;
-			else if (ICVerID == 0x00200000)
-				tp->mcfg = CFG_METHOD_15;
-			tp->efuse = EFUSE_SUPPORT;
-			return 0;
-		case 0x2C800000:
-			if (ICVerID == 0x00000000)
-				tp->mcfg = CFG_METHOD_16;
-			else if (ICVerID == 0x00100000)
-				tp->mcfg = CFG_METHOD_17;
-			tp->efuse = EFUSE_SUPPORT;
-			return 0;
-		case 0x48800000:
-			tp->mcfg = CFG_METHOD_20;
-			tp->efuse = EFUSE_SUPPORT;
-			return 0;
-		case 0x48000000:
-			if (ICVerID == 0x00000000)
-				tp->mcfg = CFG_METHOD_18;
-			else if (ICVerID == 0x00100000)
-				tp->mcfg = CFG_METHOD_19;
-			tp->efuse = EFUSE_SUPPORT;
-			return 0;
-		default:
-			printk("unknown chip version (%x)\n",reg);
-			return -1;
+	case 0x30000000:
+		tp->mcfg = CFG_METHOD_1;
+		tp->efuse = EFUSE_NOT_SUPPORT;
+		break;
+	case 0x38000000:
+		if (ICVerID == 0x00000000) {
+			tp->mcfg = CFG_METHOD_2;
+		} else if (ICVerID == 0x00500000) {
+			tp->mcfg = CFG_METHOD_3;
+		} else {
+			tp->mcfg = CFG_METHOD_3;
+		}
+		tp->efuse = EFUSE_NOT_SUPPORT;
+		break;
+	case 0x3C000000:
+		if (ICVerID == 0x00000000) {
+			tp->mcfg = CFG_METHOD_4;
+		} else if (ICVerID == 0x00200000) {
+			tp->mcfg = CFG_METHOD_5;
+		} else if (ICVerID == 0x00400000) {
+			tp->mcfg = CFG_METHOD_6;
+		} else {
+			tp->mcfg = CFG_METHOD_6;
+		}
+		tp->efuse = EFUSE_NOT_SUPPORT;
+		break;
+	case 0x3C800000:
+		if (ICVerID == 0x00100000){
+			tp->mcfg = CFG_METHOD_7;
+		} else if (ICVerID == 0x00300000){
+			tp->mcfg = CFG_METHOD_8;
+		} else {
+			tp->mcfg = CFG_METHOD_8;
+		}
+		tp->efuse = EFUSE_NOT_SUPPORT;
+		break;
+	case 0x28000000:
+		if (ICVerID == 0x00100000) {
+			tp->mcfg = CFG_METHOD_9;
+		} else if (ICVerID == 0x00300000) {
+			tp->mcfg = CFG_METHOD_10;
+		} else {
+			tp->mcfg = CFG_METHOD_10;
+		}
+		tp->efuse = EFUSE_SUPPORT;
+		break;
+	case 0x28800000:
+		if (ICVerID == 0x00000000)
+			tp->mcfg = CFG_METHOD_11;
+		else if (ICVerID == 0x00200000) {
+			tp->mcfg = CFG_METHOD_12;
+			RTL_W32(0xD0, RTL_R32(0xD0) | 0x00020000);
+		} else// if (ICVerID == 0x00300000)
+			tp->mcfg = CFG_METHOD_13;
+		tp->efuse = EFUSE_SUPPORT;
+		break;
+	case 0x2C000000:
+		if (ICVerID == 0x00100000)
+			tp->mcfg = CFG_METHOD_14;
+		else if (ICVerID == 0x00200000)
+			tp->mcfg = CFG_METHOD_15;
+		tp->efuse = EFUSE_SUPPORT;
+		break;
+	case 0x2C800000:
+		if (ICVerID == 0x00000000)
+			tp->mcfg = CFG_METHOD_16;
+		else if (ICVerID == 0x00100000)
+			tp->mcfg = CFG_METHOD_17;
+		tp->efuse = EFUSE_SUPPORT;
+		break;
+	case 0x48000000:
+		if (ICVerID == 0x00000000)
+			tp->mcfg = CFG_METHOD_18;
+		else if (ICVerID == 0x00100000)
+			tp->mcfg = CFG_METHOD_19;
+		tp->efuse = EFUSE_SUPPORT;
+		break;
+	case 0x48800000:
+		tp->mcfg = CFG_METHOD_20;
+		tp->efuse = EFUSE_SUPPORT;
+		break;
+	default:
+		printk("unknown chip version (%x)\n",reg);
+		tp->mcfg = CFG_METHOD_DEFAULT;
+		tp->efuse = EFUSE_NOT_SUPPORT;
+		break;
 	}
 }
 
@@ -11426,6 +11548,8 @@ rtl8168_hw_phy_config(struct net_device *dev)
 
 	spin_unlock_irqrestore(&tp->phy_lock, flags);
 
+	rtl8168_green_table(tp);
+	
 	if (eee_enable == 1)
 		rtl8168_enable_EEE(tp);
 	else
@@ -12301,19 +12425,24 @@ rtl8168_phy_power_up (struct net_device *dev)
 
 	spin_lock_irqsave(&tp->phy_lock, flags);
 	mdio_write(tp, 0x1F, 0x0000);
-	switch (tp->mcfg)
-	{
-		case CFG_METHOD_14:
-		case CFG_METHOD_15:
-		case CFG_METHOD_16:
-		case CFG_METHOD_17:
-		case CFG_METHOD_18:
-		case CFG_METHOD_19:
-		case CFG_METHOD_20:
-			break;
-		default:
-			mdio_write(tp, 0x0E, 0x0000);
-			break;
+	switch (tp->mcfg) {
+	case CFG_METHOD_1:
+	case CFG_METHOD_2:
+	case CFG_METHOD_3:
+	case CFG_METHOD_4:
+	case CFG_METHOD_5:
+	case CFG_METHOD_6:
+	case CFG_METHOD_7:
+	case CFG_METHOD_8:
+	case CFG_METHOD_9:
+	case CFG_METHOD_10:
+	case CFG_METHOD_11:
+	case CFG_METHOD_12:
+	case CFG_METHOD_13:
+		mdio_write(tp, 0x0E, 0x0000);
+		break;
+	default:
+		break;
 	}
 	mdio_write(tp, MII_BMCR, BMCR_ANENABLE);
 	spin_unlock_irqrestore(&tp->phy_lock, flags);
@@ -12327,23 +12456,30 @@ rtl8168_phy_power_down (struct net_device *dev)
 
 	spin_lock_irqsave(&tp->phy_lock, flags);
 	mdio_write(tp, 0x1F, 0x0000);
-	switch (tp->mcfg)
-	{
-		case CFG_METHOD_14:
-		case CFG_METHOD_15:
-			mdio_write(tp, MII_BMCR, BMCR_ANENABLE | BMCR_PDOWN);
-			break;
-		case CFG_METHOD_16:
-		case CFG_METHOD_17:
-		case CFG_METHOD_18:
-		case CFG_METHOD_19:
-		case CFG_METHOD_20:
-			mdio_write(tp, MII_BMCR, BMCR_PDOWN);
-			break;
-		default:
-			mdio_write(tp, 0x0E, 0x0200);
-			mdio_write(tp, MII_BMCR, BMCR_PDOWN);
-			break;
+	switch (tp->mcfg) {
+	case CFG_METHOD_1:
+	case CFG_METHOD_2:
+	case CFG_METHOD_3:
+	case CFG_METHOD_4:
+	case CFG_METHOD_5:
+	case CFG_METHOD_6:
+	case CFG_METHOD_7:
+	case CFG_METHOD_8:
+	case CFG_METHOD_9:
+	case CFG_METHOD_10:
+	case CFG_METHOD_11:
+	case CFG_METHOD_12:
+	case CFG_METHOD_13:
+		mdio_write(tp, 0x0E, 0x0200);
+		mdio_write(tp, MII_BMCR, BMCR_PDOWN);
+		break;
+	case CFG_METHOD_14:
+	case CFG_METHOD_15:
+		mdio_write(tp, MII_BMCR, BMCR_ANENABLE | BMCR_PDOWN);
+		break;
+	default:
+		mdio_write(tp, MII_BMCR, BMCR_PDOWN);
+		break;
 	}
 	spin_unlock_irqrestore(&tp->phy_lock, flags);
 }
@@ -12463,9 +12599,7 @@ rtl8168_init_board(struct pci_dev *pdev,
 	}
 
 	/* Identify chip attached to board */
-	rc = rtl8168_get_mac_version(tp, ioaddr);
-	if (rc < 0)
-		goto err_out_free_res;
+	rtl8168_get_mac_version(tp, ioaddr);
 
 	rtl8168_print_mac_version(tp);
 
@@ -12773,14 +12907,17 @@ rtl8168_init_one(struct pci_dev *pdev,
 #endif
 
 #ifdef CONFIG_R8168_VLAN
+	if (tp->mcfg != CFG_METHOD_DEFAULT) {
 	dev->features |= NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 	dev->vlan_rx_kill_vid = rtl8168_vlan_rx_kill_vid;
 #endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+	}
 #endif
 
-	dev->features |= NETIF_F_IP_CSUM;
 	tp->cp_cmd |= RTL_R16(CPlusCmd);
+	if (tp->mcfg != CFG_METHOD_DEFAULT) {
+	dev->features |= NETIF_F_IP_CSUM;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	tp->cp_cmd |= RxChkSum;
 #else
@@ -12790,6 +12927,7 @@ rtl8168_init_one(struct pci_dev *pdev,
 	dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
 		NETIF_F_HIGHDMA;
 #endif
+	}
 
 	tp->intr_mask = rtl8168_intr_mask;
 	tp->pci_dev = pdev;
@@ -12806,7 +12944,7 @@ rtl8168_init_one(struct pci_dev *pdev,
 		       "%2.2x:%2.2x:%2.2x:%2.2x:%2.2x:%2.2x, "
 		       "IRQ %d\n",
 		       dev->name,
-		       rtl_chip_info[ent->driver_data].name,
+		       rtl_chip_info[tp->chipset].name,
 		       dev->base_addr,
 		       dev->dev_addr[0], dev->dev_addr[1],
 		       dev->dev_addr[2], dev->dev_addr[3],
@@ -13037,11 +13175,28 @@ rtl8168_hw_start(struct net_device *dev)
 	u32 csi_tmp;
 
 	netif_stop_queue(dev);
-	if (tp->mcfg == CFG_METHOD_16 || tp->mcfg == CFG_METHOD_17 ||
-	    tp->mcfg == CFG_METHOD_18 || tp->mcfg == CFG_METHOD_19 ||
-	    tp->mcfg == CFG_METHOD_20) {
+	switch (tp->mcfg) {
+	case CFG_METHOD_1:
+	case CFG_METHOD_2:
+	case CFG_METHOD_3:
+	case CFG_METHOD_4:
+	case CFG_METHOD_5:
+	case CFG_METHOD_6:
+	case CFG_METHOD_7:
+	case CFG_METHOD_8:
+	case CFG_METHOD_9:
+	case CFG_METHOD_10:
+	case CFG_METHOD_11:
+	case CFG_METHOD_12:
+	case CFG_METHOD_13:
+	case CFG_METHOD_14:
+	case CFG_METHOD_15:
+		break;
+	default:
 		RTL_W32(RxConfig, RxCfg_128_int_en | (RX_DMA_BURST << RxCfgDMAShift));
+		break;
 	}
+
 	rtl8168_nic_reset(dev);
 
 	RTL_W8(Cfg9346, Cfg9346_Unlock);
@@ -13797,6 +13952,12 @@ rtl8168_hw_start(struct net_device *dev)
 
 			RTL_W8(Config4, RTL_R8(Config4) & ~(1 << 0));
 		}
+	} else if (tp->mcfg == CFG_METHOD_DEFAULT) {
+		tp->cp_cmd &= 0x2043;
+		RTL_W8(MTPS, 0x0C);
+
+		dev->features &= ~NETIF_F_IP_CSUM;
+		rtl8168_set_rxbufsize(tp, dev);
 	}
 
 	if ((tp->mcfg == CFG_METHOD_1) || (tp->mcfg == CFG_METHOD_2) || (tp->mcfg == CFG_METHOD_3)) {
@@ -13857,16 +14018,23 @@ rtl8168_hw_start(struct net_device *dev)
 	options2 = RTL_R8(Config5);
 	csi_tmp = rtl8168_eri_read(ioaddr, 0xDE, 4, ERIAR_ExGMAC);
 
-	if (tp->mcfg == CFG_METHOD_16 || tp->mcfg == CFG_METHOD_17) {
+	switch (tp->mcfg) {
+	case CFG_METHOD_16:
+	case CFG_METHOD_17:
 		if ((options1 & LinkUp) || (csi_tmp & BIT_0) || (options2 & UWF) || (options2 & BWF) || (options2 & MWF))
 			tp->wol_enabled = WOL_ENABLED;
 		else
 			tp->wol_enabled = WOL_DISABLED;
-	} else {
+		break;
+	case CFG_METHOD_DEFAULT:
+		tp->wol_enabled = WOL_DISABLED;
+		break;
+	default:
 		if((options1 & LinkUp) || (options1 & MagicPacket) || (options2 & UWF) || (options2 & BWF) || (options2 & MWF))
 			tp->wol_enabled = WOL_ENABLED;
 		else
 			tp->wol_enabled = WOL_DISABLED;
+		break;
 	}
 
 	udelay(10);
@@ -13878,10 +14046,18 @@ rtl8168_change_mtu(struct net_device *dev,
 		   int new_mtu)
 {
 	struct rtl8168_private *tp = netdev_priv(dev);
+	int max_mtu;
 	int ret = 0;
 
-	if (new_mtu < ETH_ZLEN || new_mtu > tp->max_jumbo_frame_size)
+	if (tp->mcfg == CFG_METHOD_DEFAULT)
+		max_mtu = ETH_DATA_LEN;
+	else
+		max_mtu = tp->max_jumbo_frame_size - ETH_HLEN - 8;
+
+	if (new_mtu < ETH_ZLEN)
 		return -EINVAL;
+	else if (new_mtu > max_mtu)
+		new_mtu = max_mtu;
 
 	if (!netif_running(dev))
 		goto out;
@@ -14282,7 +14458,11 @@ rtl8168_xmit_frags(struct rtl8168_private *tp,
 
 		txd = tp->TxDescArray + entry;
 		len = frag->size;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
 		addr = ((void *) page_address(frag->page)) + frag->page_offset;
+#else
+		addr = ((void *) page_address(frag->page.p)) + frag->page_offset;
+#endif
 		mapping = pci_map_single(tp->pci_dev, addr, len, PCI_DMA_TODEVICE);
 
 		/* anti gcc 2.95.3 bugware (sic) */
@@ -14526,6 +14706,9 @@ rtl8168_tx_interrupt(struct net_device *dev,
 		    (TX_BUFFS_AVAIL(tp) >= MAX_SKB_FRAGS)) {
 			netif_wake_queue(dev);
 		}
+		smp_rmb();
+		if (tp->cur_tx != dirty_tx)
+			RTL_W8(TxPoll, NPQ);
 	}
 }
 
@@ -14765,9 +14948,6 @@ static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance)
 
 		if (status & LinkChg)
 			rtl8168_check_link_status(dev, tp, ioaddr);
-
-		if ((status & TxOK) && (status & TxDescUnavail))
-			RTL_W8(TxPoll, NPQ);	/* set polling bit */
 
 #ifdef CONFIG_R8168_NAPI
 		if (status & rtl8168_napi_event) {

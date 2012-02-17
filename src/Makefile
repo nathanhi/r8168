@@ -30,11 +30,16 @@
 # US5,307,459, US5,434,872, US5,732,094, US6,570,884, US6,115,776, and US6,327,625.
 ################################################################################
 
+CONFIG_DOWN_SPEED_100 = n
+
 ifneq ($(KERNELRELEASE),)
 	obj-m := r8168.o
 	r8168-objs := r8168_n.o r8168_asf.o rtl_eeprom.o rtltool.o
 	EXTRA_CFLAGS += -DCONFIG_R8168_NAPI
 	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
+	ifeq ($(CONFIG_DOWN_SPEED_100), y)
+		EXTRA_CFLAGS += -DCONFIG_DOWN_SPEED_100 
+	endif
 else
 	BASEDIR := /lib/modules/$(shell uname -r)
 	KERNELDIR ?= $(BASEDIR)/build
