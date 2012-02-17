@@ -24,7 +24,7 @@ fi
 echo "Build the module and install"
 echo "-------------------------------" >> log.txt
 date 1>>log.txt
-make all 1>>log.txt || exit 1
+make $@ all 1>>log.txt || exit 1
 module=`ls src/*.ko`
 module=${module#src/}
 module=${module%.ko}

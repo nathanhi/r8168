@@ -53,7 +53,10 @@
 void rtl_eeprom_type(struct rtl8168_private *tp)
 {
 	void __iomem *ioaddr=tp->mmio_addr;
-	u16	magic;
+	u16	magic = 0;
+	
+	if (tp->mcfg == CFG_METHOD_DEFAULT)
+		goto out_no_eeprom;
 
 	if(RTL_R8(0xD2)&0x04)
 	{
@@ -72,6 +75,8 @@ void rtl_eeprom_type(struct rtl8168_private *tp)
 	}
 
 	magic = rtl_eeprom_read_sc(tp, 0);
+
+out_no_eeprom:
         if ((magic != 0x8129) && (magic != 0x8128))
         {
         	tp->eeprom_type = EEPROM_TYPE_NONE;
