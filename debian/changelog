@@ -1,3 +1,15 @@
+r8168 (8.029.00-1) unstable; urgency=low
+
+  [ Dmitry Smirnov ]
+  * d-watch: fetch directly from code.google.com
+
+  [ Andreas Beckmann ]
+  * New upstream release 8.029.00 (2012-03-29).
+  * debian/copyright: Use final copyright-format 1.0 URL and bump years.
+  * Bump Standards-Version to 3.9.3 (no changes needed).
+
+ -- Andreas Beckmann <debian@abeckmann.de>  Wed, 04 Apr 2012 10:50:07 +0200
+
 r8168 (8.028.00-1) unstable; urgency=low
 
   * New upstream release 8.028.00 (2012-02-03).
