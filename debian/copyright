@@ -1,15 +1,15 @@
-Format: http://anonscm.debian.org/viewvc/dep/web/deps/dep5.mdwn?view=markup&pathrev=174
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: r8168
 Source: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
 
 Files: *
-Copyright: Copyright(c) 2009-2011 Realtek Semiconductor Corp. All rights reserved.
-           Copyright (C) 2011  Realtek NIC software team <nicfae@realtek.com>
+Copyright: Copyright(c) 2012 Realtek Semiconductor Corp. All rights reserved.
+           Copyright (C) 2012  Realtek NIC software team <nicfae@realtek.com>
 License: GPL-2.0+
 
 Files: debian/*
-Copyright: © 2011 Andreas Beckmann <debian@abeckmann.de>
-           © 2011 Dmitry Smirnov <onlyjob@member.fsf.org>
+Copyright: © 2011-2012 Andreas Beckmann <debian@abeckmann.de>
+           © 2011-2012 Dmitry Smirnov <onlyjob@member.fsf.org>
 License: GPL-2.0+
 
 License: GPL-2.0+
