@@ -4,7 +4,7 @@
 # RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
 # RTL8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
 # 
-# Copyright(c) 2011 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2012 Realtek Semiconductor Corp. All rights reserved.
 # 
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free

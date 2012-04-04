@@ -5,7 +5,7 @@
 # RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, RTL8168DP/8111DP, and
 # RTL8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
 #
-# Copyright(c) 2011 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2012 Realtek Semiconductor Corp. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -296,6 +296,7 @@ static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance, struct pt_regs
 #else
 static irqreturn_t rtl8168_interrupt(int irq, void *dev_instance);
 #endif
+static void rtl8168_rx_desc_offset0_init(struct rtl8168_private *, int);
 static int rtl8168_init_ring(struct net_device *dev);
 static void rtl8168_hw_start(struct net_device *dev);
 static int rtl8168_close(struct net_device *dev);
@@ -1423,10 +1424,6 @@ static void rtl8168_powerup_pll(struct net_device *dev)
 {
 	struct rtl8168_private *tp = netdev_priv(dev);
 	void __iomem *ioaddr = tp->mmio_addr;
-
-	if ((tp->mcfg == CFG_METHOD_11 || tp->mcfg == CFG_METHOD_12 ||
-	     tp->mcfg == CFG_METHOD_13) && rtl8168_check_dash(tp))
-		return;
 
 	switch (tp->mcfg) {
 	case CFG_METHOD_9:
@@ -12739,8 +12736,7 @@ rtl8168_esd_timer(unsigned long __opaque)
 
 	if (tp->esd_flag != 0) {
 		rtl8168_tx_clear(tp);
-		rtl8168_rx_clear(tp);
-		rtl8168_open(dev);
+		rtl8168_hw_start(dev);
 		tp->esd_flag = 0;
 	}
 
@@ -12908,24 +12904,24 @@ rtl8168_init_one(struct pci_dev *pdev,
 
 #ifdef CONFIG_R8168_VLAN
 	if (tp->mcfg != CFG_METHOD_DEFAULT) {
-	dev->features |= NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
+		dev->features |= NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-	dev->vlan_rx_kill_vid = rtl8168_vlan_rx_kill_vid;
+		dev->vlan_rx_kill_vid = rtl8168_vlan_rx_kill_vid;
 #endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 	}
 #endif
 
 	tp->cp_cmd |= RTL_R16(CPlusCmd);
 	if (tp->mcfg != CFG_METHOD_DEFAULT) {
-	dev->features |= NETIF_F_IP_CSUM;
+		dev->features |= NETIF_F_IP_CSUM;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-	tp->cp_cmd |= RxChkSum;
+		tp->cp_cmd |= RxChkSum;
 #else
-	dev->features |= NETIF_F_RXCSUM;
-	dev->hw_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
-		NETIF_F_RXCSUM | NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
-	dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
-		NETIF_F_HIGHDMA;
+		dev->features |= NETIF_F_RXCSUM;
+		dev->hw_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
+			NETIF_F_RXCSUM | NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
+		dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
+			NETIF_F_HIGHDMA;
 #endif
 	}
 
@@ -13198,6 +13194,8 @@ rtl8168_hw_start(struct net_device *dev)
 	}
 
 	rtl8168_nic_reset(dev);
+
+	rtl8168_rx_desc_offset0_init(tp, 1);
 
 	RTL_W8(Cfg9346, Cfg9346_Unlock);
 
@@ -14239,8 +14237,6 @@ static void
 rtl8168_rx_desc_init(struct rtl8168_private *tp)
 {
 	memset(tp->RxDescArray, 0x0, NUM_RX_DESC * sizeof(struct RxDesc));
-
-	rtl8168_rx_desc_offset0_init(tp, 1);
 }
 
 static int

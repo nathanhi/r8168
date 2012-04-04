@@ -5,7 +5,7 @@
 # RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
 # RTK8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
 #
-# Copyright(c) 2011 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2012 Realtek Semiconductor Corp. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -105,12 +105,12 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.028.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.029.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
 #define GPL_CLAIM "\
-r8168  Copyright (C) 2011  Realtek NIC software team <nicfae@realtek.com> \n \
+r8168  Copyright (C) 2012  Realtek NIC software team <nicfae@realtek.com> \n \
 This program comes with ABSOLUTELY NO WARRANTY; for details, please see <http://www.gnu.org/licenses/>. \n \
 This is free software, and you are welcome to redistribute it under certain conditions; see <http://www.gnu.org/licenses/>. \n"
 
