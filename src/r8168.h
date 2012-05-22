@@ -105,7 +105,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.029.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.030.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -812,8 +812,11 @@ enum RTL8168_registers {
 	EPHY_RXER_NUM		= 0x7C,
 	EPHYAR			= 0x80,
 	OCPDR			= 0xB0,
+	MACOCP			= 0xB0,
 	OCPAR			= 0xB4,
+	PHYOCP			= 0xB8,
 	DBG_reg			= 0xD1,
+	MCUCmd_reg		= 0xD3,
 	RxMaxSize		= 0xDA,
 	EFUSEAR			= 0xDC,
 	CPlusCmd		= 0xE0,
@@ -998,6 +1001,15 @@ enum RTL8168_register_content {
 	OCPAR_Flag = 0x80000000,
 	OCPAR_GPHY_Write = 0x8000F060,
 	OCPAR_GPHY_Read = 0x0000F060,
+	OCPR_Write = 0x80000000,
+	OCPR_Read = 0x00000000,
+	OCPR_Addr_Reg_shift = 16,
+	OCPR_Flag = 0x80000000,
+	
+	/* MCU Command */
+	Now_is_oob = (1 << 7),
+	Txfifo_empty = (1 << 5),
+	Rxfifo_empty = (1 << 4),
 
 	/* E-FUSE access */
 	EFUSE_WRITE	= 0x80000000,
@@ -1200,6 +1212,7 @@ struct rtl8168_private {
 	u8	duplex;
 	u16	speed;
 	u16	eeprom_len;
+	u16	cur_page;
 
 	int (*set_speed)(struct net_device *, u8 autoneg, u16 speed, u8 duplex);
 	void (*get_settings)(struct net_device *, struct ethtool_cmd *);
@@ -1242,6 +1255,8 @@ enum mcfg {
 	CFG_METHOD_18,
 	CFG_METHOD_19,
 	CFG_METHOD_20,
+	CFG_METHOD_21,
+	CFG_METHOD_22,
 	CFG_METHOD_MAX,
 	CFG_METHOD_DEFAULT = 0xFF
 };
