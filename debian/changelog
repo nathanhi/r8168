@@ -1,10 +1,10 @@
-r8168 (8.030.00-1) UNRELEASED; urgency=low
+r8168 (8.030.00-1) unstable; urgency=low
 
   * New upstream release 8.030.00 (2012-05-14).
   * Add update-initramfs hook to install the r8168 module in the initrd.
     (Closes: #669052)
 
- -- Andreas Beckmann <debian@abeckmann.de>  Wed, 23 May 2012 00:08:45 +0200
+ -- Andreas Beckmann <debian@abeckmann.de>  Wed, 23 May 2012 02:08:12 +0200
 
 r8168 (8.029.00-1) unstable; urgency=low
 
