@@ -36,23 +36,23 @@ OOB_set_ip_mac(struct rtl8168_private *tp, struct sockaddr_in *sa, u8 *mac)
 			while ((RTL_R8(0xd3) & (BIT_5 | BIT_4)) != ((BIT_5 | BIT_4)))
 				udelay(20);
 			RTL_W8(ChipCmd, RTL_R8(ChipCmd) & ~(CmdTxEnb | CmdRxEnb));
-/*		} else {
-			unsigned long flags;
-
-			spin_lock_irqsave(&tp->phy_lock, flags);
-			mdio_write(tp, 0x1f, 0x0000);
-			data = mdio_read(tp, MII_CTRL1000);
-			data &=	~(ADVERTISE_1000HALF | ADVERTISE_1000FULL);
-			mdio_write(tp, MII_CTRL1000, data);
-			mdio_write(tp, 0x00, 0x9200); 
-			spin_unlock_irqrestore(&tp->phy_lock, flags);
-
-			ssleep(3);
-			RTL_W16(IntrStatus, RTL_R16(IntrStatus));
-
-			RTL_W32(MAR0, 0);
-			RTL_W32(MAR0 + 4, 0);
-			RTL_W16(RxMaxSize, 0x05f3);*/
+//		} else {
+//			unsigned long flags;
+//
+//			spin_lock_irqsave(&tp->phy_lock, flags);
+//			mdio_write(tp, 0x1f, 0x0000);
+//			data = mdio_read(tp, MII_CTRL1000);
+//			data &=	~(ADVERTISE_1000HALF | ADVERTISE_1000FULL);
+//			mdio_write(tp, MII_CTRL1000, data);
+//			mdio_write(tp, 0x00, 0x9200);
+//			spin_unlock_irqrestore(&tp->phy_lock, flags);
+//
+//			ssleep(3);
+//			RTL_W16(IntrStatus, RTL_R16(IntrStatus));
+//
+//			RTL_W32(MAR0, 0);
+//			RTL_W32(MAR0 + 4, 0);
+//			RTL_W16(RxMaxSize, 0x05f3);
 		}
 		RTL_W8(0xD3, RTL_R8(0xD3) & ~BIT_7);
 		rtl8168_eri_write(ioaddr, 0x180, 4, 0x06080888, ERIAR_ExGMAC);
@@ -327,6 +327,40 @@ int rtltool_ioctl(struct rtl8168_private *tp, struct ifreq *ifr)
 		ret = OOB_set_ip_mac(tp,
 				     (struct sockaddr_in *)&my_cmd.ifru_addr,
 				     my_cmd.ifru_hwaddr.sa_data);
+		break;
+
+	case RTL_READ_OOB_MAC:
+		if (!capable(CAP_NET_ADMIN))
+			return -EPERM;
+
+		my_cmd.data = OCP_read(tp, 0xf, my_cmd.offset);
+
+		if (copy_to_user(ifr->ifr_data, &my_cmd, sizeof(my_cmd))) {
+			ret = -EFAULT;
+			break;
+		}
+		break;
+
+		break;
+
+	case RTL_WRITE_OOB_MAC:
+		if (!capable(CAP_NET_ADMIN))
+			return -EPERM;
+
+		OOB_mutex_lock(tp);
+		if (my_cmd.len == 1)
+			OCP_write(tp, 0x1, my_cmd.offset, my_cmd.data);
+		else if (my_cmd.len == 2)
+			OCP_write(tp, 0x3, my_cmd.offset, my_cmd.data);
+		else if (my_cmd.len == 4)
+			OCP_write(tp, 0xf, my_cmd.offset, my_cmd.data);
+		else {
+			ret = -EOPNOTSUPP;
+		}
+		OOB_mutex_unlock(tp);
+
+		break;
+
 		break;
 
 	default:
