@@ -105,7 +105,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.030.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.031.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -799,6 +799,7 @@ enum RTL8168_registers {
 	Config3			= 0x54,
 	Config4			= 0x55,
 	Config5			= 0x56,
+	TDFNR			= 0x57,
 	TimeIntr		= 0x58,
 	PHYAR			= 0x60,
 	CSIDR			= 0x64,
@@ -988,6 +989,7 @@ enum RTL8168_register_content {
 	ERIAR_ExGMAC = 0,
 	ERIAR_MSIX = 1,
 	ERIAR_ASF = 2,
+	ERIAR_OOB = 2,
 	ERIAR_Type_shift = 16,
 	ERIAR_ByteEn = 0x0f,
 	ERIAR_ByteEn_shift = 12,
@@ -1257,6 +1259,7 @@ enum mcfg {
 	CFG_METHOD_20,
 	CFG_METHOD_21,
 	CFG_METHOD_22,
+	CFG_METHOD_23,
 	CFG_METHOD_MAX,
 	CFG_METHOD_DEFAULT = 0xFF
 };
@@ -1266,16 +1269,18 @@ enum mcfg {
 #define OOB_CMD_DRIVER_STOP	0x06
 #define OOB_CMD_SET_IPMAC	0x41
 
-extern void mdio_write(struct rtl8168_private *tp, u32 RegAddr, u32 value);
-extern void rtl8168_ephy_write(void __iomem *ioaddr, int RegAddr, int value);
-extern void OCP_write(struct rtl8168_private *tp, u8 mask, u16 Reg, u32 data);
-extern void OOB_notify(struct rtl8168_private *tp, u8 cmd);
-extern void rtl8168_init_ring_indexes(struct rtl8168_private *tp);
-extern int rtl8168_eri_write(void __iomem *ioaddr, int addr, int len, u32 value, int type);
-extern u32 mdio_read(struct rtl8168_private *tp, u32 RegAddr);
-extern u32 OCP_read(struct rtl8168_private *tp, u8 mask, u16 Reg);
-extern u32 rtl8168_eri_read(void __iomem *ioaddr, int addr, int len, int type);
-extern u16 rtl8168_ephy_read(void __iomem *ioaddr, int RegAddr);
+void mdio_write(struct rtl8168_private *tp, u32 RegAddr, u32 value);
+void rtl8168_ephy_write(void __iomem *ioaddr, int RegAddr, int value);
+void OCP_write(struct rtl8168_private *tp, u8 mask, u16 Reg, u32 data);
+void OOB_notify(struct rtl8168_private *tp, u8 cmd);
+void rtl8168_init_ring_indexes(struct rtl8168_private *tp);
+int rtl8168_eri_write(void __iomem *ioaddr, int addr, int len, u32 value, int type);
+void OOB_mutex_lock(struct rtl8168_private *tp);
+u32 mdio_read(struct rtl8168_private *tp, u32 RegAddr);
+u32 OCP_read(struct rtl8168_private *tp, u8 mask, u16 Reg);
+u32 rtl8168_eri_read(void __iomem *ioaddr, int addr, int len, int type);
+u16 rtl8168_ephy_read(void __iomem *ioaddr, int RegAddr);
+void OOB_mutex_unlock(struct rtl8168_private *tp);
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
