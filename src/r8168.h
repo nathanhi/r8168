@@ -105,7 +105,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.031.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.032.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -172,6 +172,7 @@ This is free software, and you are welcome to redistribute it under certain cond
 #define Jumbo_Frame_8k	(8 * 1024)
 #define Jumbo_Frame_9k	(9 * 1024)
 #define InterFrameGap	0x03	/* 3 means InterFrameGap = the shortest one */
+#define RxEarly_off	(1 << 11)
 
 #define R8168_REGS_SIZE		256
 #define R8168_NAPI_WEIGHT	64
