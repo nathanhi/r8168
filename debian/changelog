@@ -1,3 +1,9 @@
+r8168 (8.034.00-1) unstable; urgency=low
+
+  * New upstream release 8.034.00 (2012-11-02).
+
+ -- Andreas Beckmann <debian@abeckmann.de>  Fri, 23 Nov 2012 20:56:53 +0100
+
 r8168 (8.032.00-1) unstable; urgency=low
 
   * New upstream release 8.032.00 (2012-08-01).
