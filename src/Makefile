@@ -31,6 +31,7 @@
 ################################################################################
 
 CONFIG_DOWN_SPEED_100 = n
+CONFIG_ASPM = y
 
 ifneq ($(KERNELRELEASE),)
 	obj-m := r8168.o
@@ -39,6 +40,9 @@ ifneq ($(KERNELRELEASE),)
 	EXTRA_CFLAGS += -DCONFIG_R8168_VLAN
 	ifeq ($(CONFIG_DOWN_SPEED_100), y)
 		EXTRA_CFLAGS += -DCONFIG_DOWN_SPEED_100 
+	endif
+	ifeq ($(CONFIG_ASPM), y)
+		EXTRA_CFLAGS += -DCONFIG_ASPM 
 	endif
 else
 	BASEDIR := /lib/modules/$(shell uname -r)

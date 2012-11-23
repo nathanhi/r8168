@@ -105,7 +105,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.032.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.034.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -1008,7 +1008,8 @@ enum RTL8168_register_content {
 	OCPR_Read = 0x00000000,
 	OCPR_Addr_Reg_shift = 16,
 	OCPR_Flag = 0x80000000,
-	
+	OCP_STD_PHY_BASE_PAGE = 0x0A40,
+
 	/* MCU Command */
 	Now_is_oob = (1 << 7),
 	Txfifo_empty = (1 << 5),
@@ -1156,10 +1157,16 @@ struct pci_resource {
 	u16	mem_base_h;
 	u16	mem_base_l;
 	u8	ilr;
+	u16	resv_0x1c_h;
+	u16	resv_0x1c_l;	
 	u16	resv_0x20_h;
 	u16	resv_0x20_l;
 	u16	resv_0x24_h;
 	u16	resv_0x24_l;
+	u16	resv_0x2c_h;
+	u16	resv_0x2c_l;	
+	u32	pci_nvidia_geforce_6200;
+	u32 pci_nvidia_geforce__6250_1;
 };
 
 struct rtl8168_private {
