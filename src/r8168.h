@@ -105,7 +105,7 @@
 #define NAPI_SUFFIX	""
 #endif
 
-#define RTL8168_VERSION "8.034.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.035.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -942,6 +942,7 @@ enum RTL8168_register_content {
 	INTT_3		= 0x0003,
 
 	/* rtl8168_PHYstatus */
+	PowerSaveStatus = 0x80,	
 	TxFlowCtrl = 0x40,
 	RxFlowCtrl = 0x20,
 	_1000bpsF = 0x10,
@@ -1268,6 +1269,7 @@ enum mcfg {
 	CFG_METHOD_21,
 	CFG_METHOD_22,
 	CFG_METHOD_23,
+	CFG_METHOD_24,	
 	CFG_METHOD_MAX,
 	CFG_METHOD_DEFAULT = 0xFF
 };
