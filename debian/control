@@ -1,9 +1,8 @@
 Source: r8168
 Section: kernel
 Priority: extra
-Maintainer: Andreas Beckmann <debian@abeckmann.de>
+Maintainer: Andreas Beckmann <anbe@debian.org>
 Uploaders: Dmitry Smirnov <onlyjob@member.fsf.org>
-DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 8), dkms
 Standards-Version: 3.9.3
 Homepage: http://code.google.com/p/r8168/
