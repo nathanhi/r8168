@@ -1,10 +1,10 @@
-r8168 (8.035.00-1) UNRELEASED; urgency=low
+r8168 (8.035.00-1) unstable; urgency=low
 
   * New upstream release 8.035.00 (2012-12-21).
   * Update my email address and drop DMUA.
   * Switch to Standards-Version: 3.9.4 (no changes needed).
 
- -- Andreas Beckmann <debian@abeckmann.de>  Tue, 15 Jan 2013 13:50:39 +0100
+ -- Andreas Beckmann <anbe@debian.org>  Fri, 25 Jan 2013 19:55:16 +0100
 
 r8168 (8.034.00-1) unstable; urgency=low
 
