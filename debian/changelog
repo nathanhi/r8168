@@ -1,6 +1,7 @@
 r8168 (8.035.00-2) UNRELEASED; urgency=low
 
   * Use canonical Vcs-* URLs.
+  * Switch to debhelper 9.
 
  -- Andreas Beckmann <anbe@debian.org>  Mon, 06 May 2013 04:14:46 +0200
 
