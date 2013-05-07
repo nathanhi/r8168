@@ -1,0 +1,26 @@
+From: Andreas Beckmann <anbe@debian.org>
+Description: fix module build for kernel 3.8+
+ The __dev* attributes were removed in 3.8, see
+ https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=63a29f744fe1c19742039ce7526663a98f172f7e
+ 
+ Signed-off-by: Andreas Beckmann <anbe@debian.org>
+ Tested-by: Anton Balashov <sicness@darklogic.ru>
+Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=706978
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/r8168/+bug/1156283
+
+--- a/src/r8168_n.c
++++ b/src/r8168_n.c
+@@ -73,6 +73,13 @@
+ #include "rtl_eeprom.h"
+ #include "rtltool.h"
+ 
++/* __dev* was removed in kernel 3.8, see 63a29f744fe1c19742039ce7526663a98f172f7e */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
++#define __devinit
++#define __devexit
++#define __devexit_p(x) x
++#endif
++
+ static int eee_enable = 0 ;
+ module_param(eee_enable, int, S_IRUGO);
+ 
