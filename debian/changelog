@@ -1,11 +1,11 @@
-r8168 (8.035.00-2) UNRELEASED; urgency=low
+r8168 (8.035.00-2) unstable; urgency=low
 
   * kernel-3.8.patch: New, fix building the module for kernel 3.8+ that has
     removed the __dev* attributes.  (Closes: #706978) (LP: #1108068, #1156283)
   * Use canonical Vcs-* URLs.
   * Switch to debhelper 9.
 
- -- Andreas Beckmann <anbe@debian.org>  Mon, 06 May 2013 04:14:46 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Tue, 07 May 2013 10:02:12 +0200
 
 r8168 (8.035.00-1) unstable; urgency=low
 
