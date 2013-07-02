@@ -1,9 +1,9 @@
-r8168 (8.036.00-1) UNRELEASED; urgency=low
+r8168 (8.036.00-1) unstable; urgency=low
 
   * New upstream release 8.036.00 (2013-06-17).
   * kernel-3.8.patch: Remove, fixed upstream.
 
- -- Andreas Beckmann <anbe@debian.org>  Tue, 02 Jul 2013 10:04:14 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Tue, 02 Jul 2013 10:50:38 +0200
 
 r8168 (8.035.00-2) unstable; urgency=low
 
