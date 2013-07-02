@@ -1,6 +1,7 @@
 r8168 (8.036.00-1) UNRELEASED; urgency=low
 
   * New upstream release 8.036.00 (2013-06-17).
+  * kernel-3.8.patch: Remove, fixed upstream.
 
  -- Andreas Beckmann <anbe@debian.org>  Tue, 02 Jul 2013 10:04:14 +0200
 
