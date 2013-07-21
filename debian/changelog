@@ -1,3 +1,10 @@
+r8168 (8.036.00-2) UNRELEASED; urgency=low
+
+  * kernel-3.10.patch: New, fix building the module for kernel 3.10.
+    (Closes: #717161)
+
+ -- Andreas Beckmann <anbe@debian.org>  Sun, 21 Jul 2013 20:30:34 +0200
+
 r8168 (8.036.00-1) unstable; urgency=low
 
   * New upstream release 8.036.00 (2013-06-17).

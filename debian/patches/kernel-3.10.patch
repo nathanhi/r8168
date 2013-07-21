@@ -1,0 +1,67 @@
+Author: Ko Matsumura <minaco2@gmail.com>
+Description: add kernel 3.10 support
+Origin: other, https://code.google.com/p/r8168/issues/detail?id=15#c1
+Bug-Debian: http://bugs.debian.org/717161
+
+--- a/src/r8168_n.c	2013-06-17 20:42:48.000000000 +0900
++++ b/src/r8168_n.c	2013-07-21 00:20:02.000000000 +0900
+@@ -52,6 +52,10 @@
+ #include <linux/init.h>
+ #include <linux/rtnetlink.h>
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
++#include <uapi/linux/if_ether.h>
++#endif
++
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26)
+ #include <linux/pci-aspm.h>
+ #endif
+@@ -2232,6 +2236,9 @@
+                                swab16(opts2 & 0xffff));
+         ret = 0;
+     }
++#elif  LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
++    if (opts2 & RxVlanTag)
++        __vlan_hwaccel_put_tag(skb, htons(ETH_P_8021Q), swab16(opts2 & 0xffff));
+ #else
+     if (opts2 & RxVlanTag)
+         __vlan_hwaccel_put_tag(skb, swab16(opts2 & 0xffff));
+@@ -2294,8 +2301,11 @@
+         tp->cp_cmd |= RxChkSum;
+     else
+         tp->cp_cmd &= ~RxChkSum;
+-
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
++    if (dev->features & NETIF_F_HW_VLAN_CTAG_RX)
++#else
+     if (dev->features & NETIF_F_HW_VLAN_RX)
++#endif
+         tp->cp_cmd |= RxVlan;
+     else
+         tp->cp_cmd &= ~RxVlan;
+@@ -16195,7 +16205,11 @@
+ 
+ #ifdef CONFIG_R8168_VLAN
+     if (tp->mcfg != CFG_METHOD_DEFAULT) {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
++        dev->features |= NETIF_F_HW_VLAN_CTAG_TX | NETIF_F_HW_VLAN_CTAG_RX;
++#else
+         dev->features |= NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
++#endif
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+         dev->vlan_rx_kill_vid = rtl8168_vlan_rx_kill_vid;
+ #endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+@@ -16209,8 +16223,13 @@
+         tp->cp_cmd |= RxChkSum;
+ #else
+         dev->features |= NETIF_F_RXCSUM;
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
++        dev->hw_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
++                           NETIF_F_RXCSUM | NETIF_F_HW_VLAN_CTAG_TX | NETIF_F_HW_VLAN_CTAG_RX;
++#else
+         dev->hw_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
+                            NETIF_F_RXCSUM | NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
++#endif
+         dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
+                              NETIF_F_HIGHDMA;
+ #endif
