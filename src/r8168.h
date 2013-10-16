@@ -1,9 +1,8 @@
 /*
 ################################################################################
 #
-# r8168 is the Linux device driver released for RealTek RTL8168B/8111B,
-# RTL8168C/8111C, RTL8168CP/8111CP, RTL8168D/8111D, and RTL8168DP/8111DP, and
-# RTK8168E/8111E Gigabit Ethernet controllers with PCI-Express interface.
+# r8168 is the Linux device driver released for Realtek Gigabit Ethernet
+# controllers with PCI-Express interface.
 #
 # Copyright(c) 2013 Realtek Semiconductor Corp. All rights reserved.
 #
@@ -31,6 +30,12 @@
  *  This product is covered by one or more of the following patents:
  *  US6,570,884, US6,115,776, and US6,327,625.
  ***********************************************************************************/
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+#define NETIF_F_HW_VLAN_RX	NETIF_F_HW_VLAN_CTAG_RX
+#define NETIF_F_HW_VLAN_TX	NETIF_F_HW_VLAN_CTAG_TX
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
 #define __devinit
@@ -98,6 +103,22 @@
 #define RTL_NET_DEVICE_OPS(ops) dev->netdev_ops=&ops
 #endif
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE  1
+#endif
+
+#ifndef false
+#define false 0
+#endif
+
+#ifndef true
+#define true  1
+#endif
+
 //Due to the hardware design of RTL8111B, the low 32 bit address of receive
 //buffer must be 8-byte alignment.
 #ifndef NET_IP_ALIGN
@@ -111,7 +132,7 @@
 #define NAPI_SUFFIX ""
 #endif
 
-#define RTL8168_VERSION "8.036.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.037.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -900,15 +921,17 @@ enum RTL8168_register_content {
     TxDMAShift = 8, /* DMA burst value (0-7) is shift this many bits */
     TxMACLoopBack = (1 << 17),  /* MAC loopback */
 
-    /* Config1 register p.24 */
-    PMSTS_En    = (1 << 13),
+    /* Config1 register */
     LEDS1       = (1 << 7),
     LEDS0       = (1 << 6),
     Speed_down  = (1 << 4),
     MEMMAP      = (1 << 3),
     IOMAP       = (1 << 2),
-    VPD     = (1 << 1),
+    VPD         = (1 << 1),
     PMEnable    = (1 << 0), /* Power Management Enable */
+
+    /* Config2 register */
+    PMSTS_En    = (1 << 5),
 
     /* Config3 register */
     Isolate_en  = (1 << 12), /* Isolate enable */
@@ -1048,8 +1071,9 @@ enum _DescStatusBit {
     /* Tx private */
     /*------ offset 0 of tx descriptor ------*/
     LargeSend   = (1 << 27), /* TCP Large Send Offload (TSO) */
+    LargeSend_DP = (1 << 16), /* TCP Large Send Offload (TSO) */
     MSSShift    = 16,        /* MSS value position */
-    MSSMask     = 0x7ffU,    /* MSS value + LargeSend bit: 12 bits */
+    MSSMask     = 0x7FFU,    /* MSS value 11 bits */
     TxIPCS      = (1 << 18), /* Calculate IP checksum */
     TxUDPCS     = (1 << 17), /* Calculate UDP/IP checksum */
     TxTCPCS     = (1 << 16), /* Calculate TCP/IP checksum */
@@ -1219,10 +1243,14 @@ struct rtl8168_private {
     int phy_auto_nego_reg;
     int phy_1000_ctrl_reg;
     u8 org_mac_addr[NODE_ADDRESS_SIZE];
+    struct rtl8168_counters *tally_vaddr;
+    dma_addr_t tally_paddr;
+
 #ifdef CONFIG_R8168_VLAN
     struct vlan_group *vlgrp;
 #endif
     u8  wol_enabled;
+    u32 wol_opts;
     u8  efuse;
     u8  eeprom_type;
     u8  autoneg;
@@ -1230,6 +1258,7 @@ struct rtl8168_private {
     u16 speed;
     u16 eeprom_len;
     u16 cur_page;
+    u32 bios_setting;
 
     int (*set_speed)(struct net_device *, u8 autoneg, u16 speed, u8 duplex);
     void (*get_settings)(struct net_device *, struct ethtool_cmd *);
@@ -1242,6 +1271,16 @@ struct rtl8168_private {
     struct delayed_work task;
 #endif
     unsigned features;
+
+    u8 org_pci_offset_99;
+    u8 org_pci_offset_180;
+    u8 issue_offset_99_event;
+
+    u8 org_pci_offset_80;
+    u8 org_pci_offset_81;
+    u8 use_timer_interrrupt;
+
+    u8 in_open_fun;
 };
 
 enum eetype {
@@ -1292,8 +1331,8 @@ enum mcfg {
 //Ram Code Version
 #define NIC_RAMCODE_VERSION_CFG_METHOD_14 (0x0057)
 #define NIC_RAMCODE_VERSION_CFG_METHOD_16 (0x0055)
-#define NIC_RAMCODE_VERSION_CFG_METHOD_18 (0x0037)
-#define NIC_RAMCODE_VERSION_CFG_METHOD_20 (0x0035)
+#define NIC_RAMCODE_VERSION_CFG_METHOD_18 (0x0044)
+#define NIC_RAMCODE_VERSION_CFG_METHOD_20 (0x0044)
 #define NIC_RAMCODE_VERSION_CFG_METHOD_21 (0x0019)
 #define NIC_RAMCODE_VERSION_CFG_METHOD_24 (0x0001)
 #define NIC_RAMCODE_VERSION_CFG_METHOD_23 (0x0015)
