@@ -1,5 +1,6 @@
-r8168 (8.037.00-2) UNRELEASED; urgency=medium
+r8168 (8.038.00-1) UNRELEASED; urgency=medium
 
+  * New upstream release 8.038.00 (2014-03-04).
   * Update watch file.
   * Bump Standards-Version to 3.9.5 (no changes needed).
   * Use module aliases for PCI IDs supported by r8168 instead of blacklisting
