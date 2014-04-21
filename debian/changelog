@@ -1,12 +1,13 @@
-r8168 (8.038.00-1) UNRELEASED; urgency=medium
+r8168 (8.038.00-1) unstable; urgency=medium
 
   * New upstream release 8.038.00 (2014-03-04).
   * Update watch file.
   * Bump Standards-Version to 3.9.5 (no changes needed).
   * Use module aliases for PCI IDs supported by r8168 instead of blacklisting
     r8169.  (Closes: #739394)
+  * Update model list in package description.
 
- -- Andreas Beckmann <anbe@debian.org>  Mon, 21 Apr 2014 21:37:27 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Mon, 21 Apr 2014 22:16:01 +0200
 
 r8168 (8.037.00-1) unstable; urgency=low
 
