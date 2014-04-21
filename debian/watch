@@ -7,4 +7,4 @@ version=3
 # ftp://user:password@ip.ip.ip.ip/path/to/r8168-(.*).tar.bz2
 
 # But there exists an unofficial mirror at http://code.google.com/p/r8168/
-http://code.google.com/p/r8168/downloads/list?can=1 .*/r8168-([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)
+http://r8168dl.appspot.com .*/r8168-([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)
