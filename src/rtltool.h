@@ -17,10 +17,11 @@ enum rtl_cmd {
     RTLTOOL_READ_EEPROM,
     RTLTOOL_WRITE_EEPROM,
 
-    RTL_ARP_NS_OFFLOAD,
-    RTL_SET_OOB_IPMAC,
     RTL_READ_OOB_MAC,
     RTL_WRITE_OOB_MAC,
+
+    RTL_ENABLE_PCI_DIAG,
+    RTL_DISABLE_PCI_DIAG,
 
     RTLTOOL_INVALID
 };
@@ -30,9 +31,6 @@ struct rtltool_cmd {
     __u32	offset;
     __u32	len;
     __u32	data;
-    struct sockaddr ifru_addr;
-    struct sockaddr ifru_netmask;
-    struct sockaddr ifru_hwaddr;
 };
 
 enum mode_access {

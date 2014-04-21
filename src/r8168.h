@@ -4,7 +4,7 @@
 # r8168 is the Linux device driver released for Realtek Gigabit Ethernet
 # controllers with PCI-Express interface.
 #
-# Copyright(c) 2013 Realtek Semiconductor Corp. All rights reserved.
+# Copyright(c) 2014 Realtek Semiconductor Corp. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -31,6 +31,7 @@
  *  US6,570,884, US6,115,776, and US6,327,625.
  ***********************************************************************************/
 
+#include "r8168_dash.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 #define NETIF_F_HW_VLAN_RX	NETIF_F_HW_VLAN_CTAG_RX
@@ -119,6 +120,9 @@
 #define true  1
 #endif
 
+//Hardware will continue interrupt 10 times after interrupt finished.
+#define RTK_KEEP_INTERRUPT_COUNT (10)
+
 //Due to the hardware design of RTL8111B, the low 32 bit address of receive
 //buffer must be 8-byte alignment.
 #ifndef NET_IP_ALIGN
@@ -132,7 +136,7 @@
 #define NAPI_SUFFIX ""
 #endif
 
-#define RTL8168_VERSION "8.037.00" NAPI_SUFFIX
+#define RTL8168_VERSION "8.038.00" NAPI_SUFFIX
 #define MODULENAME "r8168"
 #define PFX MODULENAME ": "
 
@@ -855,6 +859,10 @@ enum RTL8168_registers {
     FuncEvent       = 0xF0,
     FuncEventMask       = 0xF4,
     FuncPresetState     = 0xF8,
+    IBCR0           = 0xF8,
+    IBCR2           = 0xF9,
+    IBIMR0          = 0xFA,
+    IBISR0          = 0xFB,
     FuncForceEvent      = 0xFC,
 };
 
@@ -1197,8 +1205,8 @@ struct pci_resource {
     u16 resv_0x24_l;
     u16 resv_0x2c_h;
     u16 resv_0x2c_l;
-    u32 pci_nvidia_geforce_6200;
-    u32 pci_nvidia_geforce__6250_1;
+    u32 pci_sn_l;
+    u32 pci_sn_h;
 };
 
 struct rtl8168_private {
@@ -1240,6 +1248,7 @@ struct rtl8168_private {
     unsigned int rtl8168_rx_config;
     u16 cp_cmd;
     u16 intr_mask;
+    u16 timer_intr_mask;
     int phy_auto_nego_reg;
     int phy_1000_ctrl_reg;
     u8 org_mac_addr[NODE_ADDRESS_SIZE];
@@ -1281,6 +1290,82 @@ struct rtl8168_private {
     u8 use_timer_interrrupt;
 
     u8 in_open_fun;
+
+    u32 keep_intr_cnt;
+
+    u8  HwIcVerUnknown;
+    u8  NotWrRamCodeToMicroP;
+    u8  NotWrMcuPatchCode;
+    u8  HwHasWrRamCodeToMicroP;
+
+    u8 rtk_enable_diag;
+
+    //Dash+++++++++++++++++
+    u8 HwSuppDashVer;
+    u8 DASH;
+
+#ifdef ENABLE_DASH_SUPPORT
+    u16 AfterRecvFromFwBufLen;
+    u8 AfterRecvFromFwBuf[RECV_FROM_FW_BUF_SIZE];
+    u16 AfterSendToFwBufLen;
+    u8 AfterSendToFwBuf[SEND_TO_FW_BUF_SIZE];
+    u16 SendToFwBufferLen;
+    u32 SizeOfSendToFwBuffer ;
+    u32 SizeOfSendToFwBufferMemAlloc ;
+    u32 NumOfSendToFwBuffer ;
+
+    u8 OobReq;
+    u8 OobAck;
+    u32 OobReqComplete;
+    u32 OobAckComplete;
+
+    u8 RcvFwReqSysOkEvt;
+    u8 RcvFwDashOkEvt;
+    u8 SendFwHostOkEvt;
+
+    u8 DashFwDisableRx;
+
+    void *UnalignedSendToFwBufferVa;
+    void *SendToFwBuffer ;
+    u64 SendToFwBufferPhy ;
+    u8 SendingToFw;
+    u64 UnalignedSendToFwBufferPa;
+    PTX_DASH_SEND_FW_DESC TxDashSendFwDesc;
+    u64 TxDashSendFwDescPhy;
+    u8 *UnalignedTxDashSendFwDescVa;
+    u32 SizeOfTxDashSendFwDescMemAlloc;
+    u32 SizeOfTxDashSendFwDesc ;
+    u32 NumTxDashSendFwDesc ;
+    u32 CurrNumTxDashSendFwDesc ;
+    u64 UnalignedTxDashSendFwDescPa;
+
+    u32 NumRecvFromFwBuffer ;
+    u32 SizeOfRecvFromFwBuffer ;
+    u32 SizeOfRecvFromFwBufferMemAlloc ;
+    void *RecvFromFwBuffer ;
+    u64 RecvFromFwBufferPhy ;
+
+    void *UnalignedRecvFromFwBufferVa;
+    u64 UnalignedRecvFromFwBufferPa;
+    PRX_DASH_FROM_FW_DESC RxDashRecvFwDesc;
+    u64 RxDashRecvFwDescPhy;
+    u8 *UnalignedRxDashRecvFwDescVa;
+    u32 SizeOfRxDashRecvFwDescMemAlloc;
+    u32 SizeOfRxDashRecvFwDesc ;
+    u32 NumRxDashRecvFwDesc ;
+    u32 CurrNumRxDashRecvFwDesc ;
+    u64 UnalignedRxDashRecvFwDescPa;
+    u8 DashReqRegValue;
+    u16 HostReqValue;
+
+    u32 CmacResetIsrCounter;
+    u8 CmacResetIsr1st ;
+    u8 CmacResetIsr2nd ;
+    u8 CmacResetting ;
+    u8 CmacOobIssueCmacReset ;
+#endif
+
+    //Dash-----------------
 };
 
 enum eetype {
@@ -1318,6 +1403,7 @@ enum mcfg {
     CFG_METHOD_25,
     CFG_METHOD_26,
     CFG_METHOD_27,
+    CFG_METHOD_28,
     CFG_METHOD_MAX,
     CFG_METHOD_DEFAULT = 0xFF
 };
@@ -1337,8 +1423,10 @@ enum mcfg {
 #define NIC_RAMCODE_VERSION_CFG_METHOD_24 (0x0001)
 #define NIC_RAMCODE_VERSION_CFG_METHOD_23 (0x0015)
 #define NIC_RAMCODE_VERSION_CFG_METHOD_26 (0x0012)
+#define NIC_RAMCODE_VERSION_CFG_METHOD_28 (0x0010)
 
 void mdio_write(struct rtl8168_private *tp, u32 RegAddr, u32 value);
+void mdio_prot_write(struct rtl8168_private *tp, u32 RegAddr, u32 value);
 void rtl8168_ephy_write(void __iomem *ioaddr, int RegAddr, int value);
 void OCP_write(struct rtl8168_private *tp, u8 mask, u16 Reg, u32 data);
 void OOB_notify(struct rtl8168_private *tp, u8 cmd);
@@ -1350,6 +1438,10 @@ u32 OCP_read(struct rtl8168_private *tp, u8 mask, u16 Reg);
 u32 rtl8168_eri_read(void __iomem *ioaddr, int addr, int len, int type);
 u16 rtl8168_ephy_read(void __iomem *ioaddr, int RegAddr);
 void OOB_mutex_unlock(struct rtl8168_private *tp);
+void Dash2DisableTx(struct rtl8168_private *tp);
+void Dash2EnableTx(struct rtl8168_private *tp);
+void Dash2DisableRx(struct rtl8168_private *tp);
+void Dash2EnableRx(struct rtl8168_private *tp);
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
