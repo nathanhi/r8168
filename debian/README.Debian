@@ -17,7 +17,8 @@ following:
     To: Francois Romieu <romieu@fr.zoreil.com>
     Cc: netdev@vger.kernel.org
 
-  You may also wish to open a Debian bug report and Cc that.
+  You may also wish to open a Debian bug report (against the
+  src:linux package) and Cc that.
 
 
 If you want to switch back from r8168-dkms to the in-kernel r8169
