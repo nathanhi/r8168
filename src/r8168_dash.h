@@ -38,63 +38,63 @@
 
 enum rtl_dash_cmd {
 
-    RTL_DASH_ARP_NS_OFFLOAD=0,
-    RTL_DASH_SET_OOB_IPMAC,
-    RTL_DASH_NOTIFY_OOB,
+        RTL_DASH_ARP_NS_OFFLOAD=0,
+        RTL_DASH_SET_OOB_IPMAC,
+        RTL_DASH_NOTIFY_OOB,
 
-    RTL_DASH_SEND_BUFFER_DATA_TO_DASH_FW,
-    RTL_DASH_CHECK_SEND_BUFFER_TO_DASH_FW_COMPLETE,
-    RTL_DASH_GET_RCV_FROM_FW_BUFFER_DATA,
+        RTL_DASH_SEND_BUFFER_DATA_TO_DASH_FW,
+        RTL_DASH_CHECK_SEND_BUFFER_TO_DASH_FW_COMPLETE,
+        RTL_DASH_GET_RCV_FROM_FW_BUFFER_DATA,
 
-    RTLT_DASH_COMMAND_INVALID
+        RTLT_DASH_COMMAND_INVALID
 };
 
 struct rtl_dash_ip_mac {
-    struct sockaddr ifru_addr;
-    struct sockaddr ifru_netmask;
-    struct sockaddr ifru_hwaddr;
+        struct sockaddr ifru_addr;
+        struct sockaddr ifru_netmask;
+        struct sockaddr ifru_hwaddr;
 };
 
 struct rtl_dash_ioctl_struct {
-    __u32	cmd;
-    __u32	offset;
-    __u32	len;
-    union {
-        __u32	data;
-        void *data_buffer;
-    };
+        __u32	cmd;
+        __u32	offset;
+        __u32	len;
+        union {
+                __u32	data;
+                void *data_buffer;
+        };
 };
 
 typedef struct _RX_DASH_FROM_FW_DESC {
-    u16 length;
-    u8 statusLowByte;
-    u8 statusHighByte;
-    u32 resv;
-    u64 BufferAddress;
+        u16 length;
+        u8 statusLowByte;
+        u8 statusHighByte;
+        u32 resv;
+        u64 BufferAddress;
 }
 RX_DASH_FROM_FW_DESC, *PRX_DASH_FROM_FW_DESC;
 
 typedef struct _TX_DASH_SEND_FW_DESC {
-    u16 length;
-    u8 statusLowByte;
-    u8 statusHighByte;
-    u32 resv;
-    u64 BufferAddress;
+        u16 length;
+        u8 statusLowByte;
+        u8 statusHighByte;
+        u32 resv;
+        u64 BufferAddress;
 }
 TX_DASH_SEND_FW_DESC, *PTX_DASH_SEND_FW_DESC;
 
 typedef struct _OSOOBHdr {
-    u32 len;
-    u8 type;
-    u8 flag;
-    u8 hostReqV;
-    u8 res;
+        u32 len;
+        u8 type;
+        u8 flag;
+        u8 hostReqV;
+        u8 res;
 }
 OSOOBHdr, *POSOOBHdr;
 
 typedef struct _RX_DASH_BUFFER_TYPE_2 {
-    OSOOBHdr oobhdr;
-    void *RxDataBuffer;
+        OSOOBHdr oobhdr;
+        void *RxDataBuffer;
 }
 RX_DASH_BUFFER_TYPE_2, *PRX_DASH_BUFFER_TYPE_2;
 
