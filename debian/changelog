@@ -1,8 +1,9 @@
-r8168 (8.039.00-1) UNRELEASED; urgency=medium
+r8168 (8.039.00-1) unstable; urgency=medium
 
   * New upstream release 8.039.00 (2014-09-18).
+    (Closes: #760980, #743399, #756183) (LP: #1363072)
 
- -- Andreas Beckmann <anbe@debian.org>  Sun, 28 Sep 2014 03:55:33 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Sun, 28 Sep 2014 04:22:52 +0200
 
 r8168 (8.038.00-1) unstable; urgency=medium
 
@@ -17,7 +18,7 @@ r8168 (8.038.00-1) unstable; urgency=medium
 
 r8168 (8.037.00-1) unstable; urgency=low
 
-  * New upstream release 8.037.00 (2013-09-24).
+  * New upstream release 8.037.00 (2013-09-24).  (LP: #1216906)
   * kernel-3.10.patch: Remove, fixed upstream.
 
  -- Andreas Beckmann <anbe@debian.org>  Wed, 16 Oct 2013 23:53:46 +0200
