@@ -3,6 +3,7 @@ r8168 (8.040.00-1) UNRELEASED; urgency=medium
   * New upstream release 8.040.00 (2015-05-14).
   * Move package to non-free, appears to apply binary patches to firmware.
     (Closes: #777257)
+  * Bump Standards-Version to 3.9.6 (no changes needed).
 
  -- Andreas Beckmann <anbe@debian.org>  Thu, 04 Jun 2015 14:48:34 +0200
 
