@@ -1,4 +1,4 @@
-r8168 (8.040.00-1) UNRELEASED; urgency=medium
+r8168 (8.040.00-1) unstable; urgency=medium
 
   * New upstream release 8.040.00 (2015-05-14).
   * Move package to non-free, appears to apply binary patches to firmware.
@@ -6,7 +6,7 @@ r8168 (8.040.00-1) UNRELEASED; urgency=medium
   * Bump Standards-Version to 3.9.6 (no changes needed).
   * Update Homepage and Vcs-Browser URLs.
 
- -- Andreas Beckmann <anbe@debian.org>  Thu, 04 Jun 2015 14:48:34 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Tue, 23 Jun 2015 12:55:20 +0200
 
 r8168 (8.039.00-1) unstable; urgency=medium
 
