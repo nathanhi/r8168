@@ -6,5 +6,5 @@ version=3
 # redirects to a dynamically created ftp account like
 # ftp://user:password@ip.ip.ip.ip/path/to/r8168-(.*).tar.bz2
 
-# But there exists an unofficial mirror at http://code.google.com/p/r8168/
-http://r8168dl.appspot.com .*/r8168-([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)
+# But there exist unofficial mirrors ...
+https://github.com/mtorromeo/r8168/releases /mtorromeo/r8168/archive/([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)
