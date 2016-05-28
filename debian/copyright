@@ -3,8 +3,8 @@ Upstream-Name: r8168
 Source: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
 
 Files: *
-Copyright: Copyright(c) 2013-2015 Realtek Semiconductor Corp. All rights reserved.
-           Copyright (C) 2015  Realtek NIC software team <nicfae@realtek.com>
+Copyright: Copyright(c) 2013-2016 Realtek Semiconductor Corp. All rights reserved.
+           Copyright (C) 2016  Realtek NIC software team <nicfae@realtek.com>
 License: GPL-2.0+
 
 Files: debian/*
