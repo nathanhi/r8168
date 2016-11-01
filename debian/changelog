@@ -1,3 +1,9 @@
+r8168 (8.043.02-1) UNRELEASED; urgency=medium
+
+  * New upstream release 8.043.02 (2016-10-25).
+
+ -- Andreas Beckmann <anbe@debian.org>  Tue, 01 Nov 2016 09:34:46 +0100
+
 r8168 (8.042.00-2) unstable; urgency=medium
 
   * linux-4.7.patch: New, from Arch Linux, fix building the module for
