@@ -3,7 +3,7 @@ Description: disable some bits not available in older 2.6 kernels
 
 --- a/src/r8168_n.c
 +++ b/src/r8168_n.c
-@@ -22789,11 +22789,15 @@ rtl8168_init_one(struct pci_dev *pdev,
+@@ -22941,11 +22941,15 @@ rtl8168_init_one(struct pci_dev *pdev,
                  dev->vlan_features = NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_TSO |
                                       NETIF_F_HIGHDMA;
  #endif
@@ -18,10 +18,10 @@ Description: disable some bits not available in older 2.6 kernels
 +#endif
                          netif_set_gso_max_size(dev, LSO_32K);
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
- #if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
-@@ -22802,7 +22806,9 @@ rtl8168_init_one(struct pci_dev *pdev,
                          dev->gso_max_segs = NIC_MAX_PHYS_BUF_COUNT_LSO_64K;
- #endif
+@@ -22954,7 +22958,9 @@ rtl8168_init_one(struct pci_dev *pdev,
+ #endif //LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+ #endif //LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
                  } else {
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)
                          dev->hw_features |= NETIF_F_IPV6_CSUM | NETIF_F_TSO6;
@@ -29,7 +29,7 @@ Description: disable some bits not available in older 2.6 kernels
                          dev->features |=  NETIF_F_IPV6_CSUM | NETIF_F_TSO6;
                          netif_set_gso_max_size(dev, LSO_64K);
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)
-@@ -23222,8 +23228,10 @@ rtl8168_hw_config(struct net_device *dev
+@@ -23374,8 +23380,10 @@ rtl8168_hw_config(struct net_device *dev
                  dev->features &= ~(NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM);
          } else {
                  dev->features |= NETIF_F_IP_CSUM;
