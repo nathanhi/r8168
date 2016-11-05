@@ -1,9 +1,9 @@
-r8168 (8.043.02-1) UNRELEASED; urgency=medium
+r8168 (8.043.02-1) unstable; urgency=medium
 
   * New upstream release 8.043.02 (2016-10-25).
   * linux-4.7.patch: Remove, fixed upstream.
 
- -- Andreas Beckmann <anbe@debian.org>  Tue, 01 Nov 2016 09:34:46 +0100
+ -- Andreas Beckmann <anbe@debian.org>  Sat, 05 Nov 2016 10:35:19 +0100
 
 r8168 (8.042.00-2) unstable; urgency=medium
 
