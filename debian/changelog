@@ -1,3 +1,9 @@
+r8168 (8.044.02-1) UNRELEASED; urgency=medium
+
+  * New upstream release 8.044.02 (2017-02-13).
+
+ -- Andreas Beckmann <anbe@debian.org>  Tue, 21 Feb 2017 00:20:39 +0100
+
 r8168 (8.043.02-1) unstable; urgency=medium
 
   * New upstream release 8.043.02 (2016-10-25).
