@@ -3,7 +3,7 @@ Section: non-free/kernel
 Priority: extra
 Maintainer: Andreas Beckmann <anbe@debian.org>
 Build-Depends: debhelper (>= 10), dkms
-Standards-Version: 3.9.8
+Standards-Version: 4.0.0
 Homepage: https://github.com/mtorromeo/r8168
 Vcs-Git: https://anonscm.debian.org/git/collab-maint/r8168.git
 Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/r8168.git
