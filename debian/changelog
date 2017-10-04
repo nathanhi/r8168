@@ -1,6 +1,7 @@
 r8168 (8.045.08-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.045.08 (2017-09-15).
+  * linux-4.11.patch: Remove, fixed upstream.
 
  -- Andreas Beckmann <anbe@debian.org>  Wed, 04 Oct 2017 10:19:42 +0200
 
