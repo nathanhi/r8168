@@ -2,17 +2,17 @@
 
 #export DH_VERBOSE=1
 
-VERSION	:= $(shell dpkg-parsechangelog | sed -nr '/^Version:/s/Version: (.*:)?(.*)-(.*)/\2/p')
+include /usr/share/dpkg/pkg-info.mk
 
 %:
 	dh $@ --with dkms
 
 override_dh_install:
-	dh_install src/*.h src/*.c src/Makefile usr/src/r8168-$(VERSION)/
+	dh_install src/*.h src/*.c src/Makefile usr/src/r8168-$(DEB_VERSION_UPSTREAM)/
 	find debian/r8168-dkms/usr/src -type f -perm -5 -print0 2>/dev/null | xargs -0r chmod a-X
 
 override_dh_dkms:
-	dh_dkms -V $(VERSION)
+	dh_dkms -V $(DEB_VERSION_UPSTREAM)
 
 # do nothing
 override_dh_auto_configure override_dh_auto_build override_dh_auto_test override_dh_auto_install override_dh_auto_clean:

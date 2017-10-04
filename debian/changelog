@@ -2,6 +2,7 @@ r8168 (8.045.08-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.045.08 (2017-09-15).
   * linux-4.11.patch: Remove, fixed upstream.
+  * Use dpkg makefile snippets instead of manual changelog parsing.
   * Set Priority to optional.
   * Bump Standards-Version to 4.1.1.
   * Set XS-Autobuild: yes.
