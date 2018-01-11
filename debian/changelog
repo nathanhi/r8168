@@ -4,6 +4,7 @@ r8168 (8.045.08-2) UNRELEASED; urgency=medium
     Linux 4.15.  (Closes: #882838) (LP: #1737755)
   * Bump Standards-Version to 4.1.3 (no changes needed).
   * Switch to debhelper compat level 11.
+  * Set Rules-Requires-Root: no.
 
  -- Andreas Beckmann <anbe@debian.org>  Thu, 11 Jan 2018 23:52:04 +0100
 
