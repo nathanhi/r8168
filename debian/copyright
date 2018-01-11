@@ -1,4 +1,4 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: r8168
 Source: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
 
@@ -8,7 +8,7 @@ Copyright: Copyright(c) 2013-2017 Realtek Semiconductor Corp. All rights reserve
 License: GPL-2.0+
 
 Files: debian/*
-Copyright: © 2011-2017 Andreas Beckmann <anbe@debian.org>
+Copyright: © 2011-2018 Andreas Beckmann <anbe@debian.org>
            © 2011-2012 Dmitry Smirnov <onlyjob@member.fsf.org>
 License: GPL-2.0+
 
