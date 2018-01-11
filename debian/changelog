@@ -1,4 +1,4 @@
-r8168 (8.045.08-2) UNRELEASED; urgency=medium
+r8168 (8.045.08-2) unstable; urgency=medium
 
   * linux-4.15-2.patch: New, from Arch Linux, fix building the module for
     Linux 4.15.  (Closes: #882838) (LP: #1737755)
@@ -6,7 +6,7 @@ r8168 (8.045.08-2) UNRELEASED; urgency=medium
   * Switch to debhelper compat level 11.
   * Set Rules-Requires-Root: no.
 
- -- Andreas Beckmann <anbe@debian.org>  Thu, 11 Jan 2018 23:52:04 +0100
+ -- Andreas Beckmann <anbe@debian.org>  Fri, 12 Jan 2018 00:55:37 +0100
 
 r8168 (8.045.08-1) unstable; urgency=medium
 
@@ -45,7 +45,7 @@ r8168 (8.043.02-1) unstable; urgency=medium
 r8168 (8.042.00-2) unstable; urgency=medium
 
   * linux-4.7.patch: New, from Arch Linux, fix building the module for
-    Linux 4.7.  (Closes: #836961)
+    Linux 4.7.  (Closes: #836961) (LP: #1647916)
   * linux-2.6.32.patch: New, fix building the module for Linux 2.6.32.
 
  -- Andreas Beckmann <anbe@debian.org>  Mon, 12 Sep 2016 11:09:22 +0200
@@ -61,6 +61,7 @@ r8168 (8.041.01-1) unstable; urgency=medium
 
   * New upstream release 8.041.01 (2016-01-12).
   * linux-4.5.patch: New, fix building the module for Linux 4.5.
+    (LP: #1635824)
   * Bump Standards-Version to 3.9.6 (no changes needed).
   * Update Vcs-Git URL.
 
@@ -79,7 +80,7 @@ r8168 (8.041.00-1) unstable; urgency=medium
 
 r8168 (8.040.00-1) unstable; urgency=medium
 
-  * New upstream release 8.040.00 (2015-05-14).
+  * New upstream release 8.040.00 (2015-05-14).  (LP: #1487605)
   * Move package to non-free, appears to apply binary patches to firmware.
     (Closes: #777257)
   * Bump Standards-Version to 3.9.6 (no changes needed).
@@ -90,7 +91,7 @@ r8168 (8.040.00-1) unstable; urgency=medium
 r8168 (8.039.00-1) unstable; urgency=medium
 
   * New upstream release 8.039.00 (2014-09-18).
-    (Closes: #760980, #743399, #756183) (LP: #1363072)
+    (Closes: #760980, #743399, #756183) (LP: #1363072, #1422825)
 
  -- Andreas Beckmann <anbe@debian.org>  Sun, 28 Sep 2014 04:22:52 +0200
 
