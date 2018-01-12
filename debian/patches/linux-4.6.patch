@@ -1,0 +1,70 @@
+Author: Andreas Beckmann <anbe@debian.org>
+Description: this was not changed in 4.6 but in 4.7
+
+--- a/src/r8168_n.c
++++ b/src/r8168_n.c
+@@ -4539,7 +4539,7 @@ rtl8168_set_speed(struct net_device *dev
+ #if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,22)
+ static int
+ rtl8168_set_settings(struct net_device *dev,
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+                      struct ethtool_cmd *cmd
+ #else
+                      const struct ethtool_link_ksettings *cmd
+@@ -4553,7 +4553,7 @@ rtl8168_set_settings(struct net_device *
+         u32 speed;
+         u8 duplex;
+ 
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+         autoneg = cmd->autoneg;
+         speed = cmd->speed;
+         duplex = cmd->duplex;
+@@ -4842,7 +4842,7 @@ static int rtl8168_set_features(struct n
+ #endif
+ 
+ static void rtl8168_gset_xmii(struct net_device *dev,
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+                               struct ethtool_cmd *cmd
+ #else
+                               struct ethtool_link_ksettings *cmd
+@@ -4900,7 +4900,7 @@ static void rtl8168_gset_xmii(struct net
+         duplex = ((status & _1000bpsF) || (status & FullDup)) ?
+                  DUPLEX_FULL : DUPLEX_HALF;
+ 
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+         cmd->supported = supported;
+         cmd->advertising = advertising;
+         cmd->autoneg = autoneg;
+@@ -4920,7 +4920,7 @@ static void rtl8168_gset_xmii(struct net
+ #if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,22)
+ static int
+ rtl8168_get_settings(struct net_device *dev,
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+                      struct ethtool_cmd *cmd
+ #else
+                      struct ethtool_link_ksettings *cmd
+@@ -5355,7 +5355,7 @@ static const struct ethtool_ops rtl8168_
+         .get_drvinfo        = rtl8168_get_drvinfo,
+         .get_regs_len       = rtl8168_get_regs_len,
+         .get_link       = ethtool_op_get_link,
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+         .get_settings       = rtl8168_get_settings,
+         .set_settings       = rtl8168_set_settings,
+ #else
+--- a/src/r8168.h
++++ b/src/r8168.h
+@@ -1458,7 +1458,7 @@ struct rtl8168_private {
+         u32 bios_setting;
+ 
+         int (*set_speed)(struct net_device *, u8 autoneg, u32 speed, u8 duplex);
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+         void (*get_settings)(struct net_device *, struct ethtool_cmd *);
+ #else
+         void (*get_settings)(struct net_device *, struct ethtool_link_ksettings *);
