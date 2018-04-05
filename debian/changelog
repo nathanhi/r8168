@@ -1,6 +1,7 @@
 r8168 (8.045.08-3) UNRELEASED; urgency=medium
 
   * Restore support for older kernels.
+  * Switch Vcs-* URLs to salsa.debian.org.
 
  -- Andreas Beckmann <anbe@debian.org>  Fri, 12 Jan 2018 03:44:55 +0100
 
