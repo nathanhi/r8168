@@ -1,6 +1,12 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: r8168
 Source: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
+Disclaimer:
+ This package is not part of the GNU/Linux Debian distribution. It is
+ provided in the non-free archive area as a convenience to Debian users.
+ The contents of this source package are freely licensed under the GPL-2.0+
+ license, but it seems to apply binary patches to firmware, making the
+ package unfit for main.
 
 Files: *
 Copyright: Copyright(c) 2013-2017 Realtek Semiconductor Corp. All rights reserved.
