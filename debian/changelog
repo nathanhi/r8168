@@ -1,10 +1,10 @@
-r8168 (8.045.08-3) UNRELEASED; urgency=medium
+r8168 (8.045.08-3) unstable; urgency=medium
 
   * Restore support for older kernels.
   * Switch Vcs-* URLs to salsa.debian.org.
   * Bump Standards-Version to 4.1.4 (no changes needed).
 
- -- Andreas Beckmann <anbe@debian.org>  Fri, 12 Jan 2018 03:44:55 +0100
+ -- Andreas Beckmann <anbe@debian.org>  Fri, 06 Apr 2018 14:42:03 +0200
 
 r8168 (8.045.08-2) unstable; urgency=medium
 
