@@ -1,6 +1,8 @@
 r8168 (8.046.00-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.046.00 (2018-08-03).  (Closes: #903255)
+  * Remove kernel support patches that were fixed upstream.
+  * Refresh remaining patches.
 
  -- Andreas Beckmann <anbe@debian.org>  Sun, 05 Aug 2018 09:32:13 +0200
 

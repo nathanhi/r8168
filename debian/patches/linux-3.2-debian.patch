@@ -1,14 +1,14 @@
 Author: Andreas Beckmann <anbe@debian.org>
 Description: eth_hw_addr_random() was backported in Debian
 
---- a/src/r8168.h
-+++ b/src/r8168.h
-@@ -36,7 +36,7 @@
- #include "r8168_realwow.h"
- #include "r8168_fiber.h"
+--- a/src/r8168_n.c
++++ b/src/r8168_n.c
+@@ -550,7 +550,7 @@ static inline u32 mii_stat1000_to_ethtoo
+ 
+ #endif //LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0)
  
 -#if LINUX_VERSION_CODE < KERNEL_VERSION(3,4,0)
 +#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
- #include <linux/etherdevice.h>
  static inline void eth_hw_addr_random(struct net_device *dev)
  {
+         random_ether_addr(dev->dev_addr);
