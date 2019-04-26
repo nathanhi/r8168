@@ -1,6 +1,7 @@
 r8168 (8.047.01-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.047.01 (2019-04-18).
+  * Switch to debhelper-compat (= 12).
 
  -- Andreas Beckmann <anbe@debian.org>  Fri, 26 Apr 2019 21:07:59 +0200
 

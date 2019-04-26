@@ -2,7 +2,9 @@ Source: r8168
 Section: non-free/kernel
 Priority: optional
 Maintainer: Andreas Beckmann <anbe@debian.org>
-Build-Depends: debhelper (>= 11~), dkms
+Build-Depends:
+ debhelper-compat (= 12),
+ dkms,
 Rules-Requires-Root: no
 Standards-Version: 4.2.0
 Homepage: http://www.realtek.com.tw/downloads/downloadsView.aspx?PFid=5&Level=5&Conn=4&DownTypeID=3#2
