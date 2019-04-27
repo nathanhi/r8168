@@ -1,11 +1,11 @@
-r8168 (8.047.01-1) UNRELEASED; urgency=medium
+r8168 (8.047.01-1) unstable; urgency=medium
 
   * New upstream release 8.047.01 (2019-04-18).
   * Switch to debhelper-compat (= 12).
   * Update Homepage URL.
   * Bump Standards-Version to 4.3.0 (no changes needed).
 
- -- Andreas Beckmann <anbe@debian.org>  Fri, 26 Apr 2019 21:07:59 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Sat, 27 Apr 2019 06:56:01 +0200
 
 r8168 (8.046.00-1) unstable; urgency=medium
 
