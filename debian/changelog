@@ -2,6 +2,7 @@ r8168 (8.047.02-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.047.02 (2019-06-21).
   * Refresh patches.
+  * Bump Standards-Version to 4.4.0 (no changes needed).
 
  -- Andreas Beckmann <anbe@debian.org>  Tue, 30 Jul 2019 09:36:10 +0200
 
