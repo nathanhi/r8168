@@ -1,3 +1,9 @@
+r8168 (8.047.02-2) UNRELEASED; urgency=medium
+
+  * linux-3.5.patch: New, add fallback for some macros that may be undefined.
+
+ -- Andreas Beckmann <anbe@debian.org>  Wed, 31 Jul 2019 19:38:16 +0200
+
 r8168 (8.047.02-1) unstable; urgency=medium
 
   * New upstream release 8.047.02 (2019-06-21).
