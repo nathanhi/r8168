@@ -2,6 +2,7 @@ r8168 (8.047.04-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.047.04 (2019-08-02).
   * linux-3.5.patch: New, add fallback for some macros that may be undefined.
+  * Bump Standards-Version to 4.4.1 (no changes needed).
 
  -- Andreas Beckmann <anbe@debian.org>  Wed, 16 Oct 2019 13:58:17 +0200
 
