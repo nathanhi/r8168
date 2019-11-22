@@ -1,0 +1,20 @@
+Author: Thadeu Lima de Souza Cascardo <cascardo@canonical.com>
+Subject: Fix build for Linux 5.4
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1852616
+Forwarded: no
+Last-Update: 2019-11-18
+Index: r8168-8.047.04/src/r8168_n.c
+===================================================================
+--- r8168-8.047.04.orig/src/r8168_n.c
++++ r8168-8.047.04/src/r8168_n.c
+@@ -57,8 +57,10 @@
+ #include <linux/completion.h>
+ 
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+ #include <linux/pci-aspm.h>
+ #endif
++#endif
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,37)
+ #include <linux/prefetch.h>
+ #endif

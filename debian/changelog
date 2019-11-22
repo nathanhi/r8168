@@ -1,6 +1,8 @@
 r8168 (8.047.05-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.047.05 (2019-11-15).
+  * linux-5.4.patch: New, from Ubuntu, fix building the module for Linux 5.4.
+    (LP: #1852616)
 
  -- Andreas Beckmann <anbe@debian.org>  Fri, 22 Nov 2019 03:20:20 +0100
 
