@@ -1,8 +1,8 @@
-r8168 (8.048.00-1) UNRELEASED; urgency=medium
+r8168 (8.048.00-1) unstable; urgency=medium
 
   * New upstream release 8.048.00 (2020-01-08).
 
- -- Andreas Beckmann <anbe@debian.org>  Tue, 14 Jan 2020 14:14:15 +0100
+ -- Andreas Beckmann <anbe@debian.org>  Wed, 15 Jan 2020 01:18:32 +0100
 
 r8168 (8.047.05-1) unstable; urgency=medium
 
