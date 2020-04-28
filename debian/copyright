@@ -9,12 +9,12 @@ Disclaimer:
  package unfit for main.
 
 Files: *
-Copyright: Copyright(c) 2013-2018 Realtek Semiconductor Corp. All rights reserved.
-           Copyright (C) 2018  Realtek NIC software team <nicfae@realtek.com>
+Copyright: Copyright(c) 2013-2020 Realtek Semiconductor Corp. All rights reserved.
+           Copyright (C) 2020  Realtek NIC software team <nicfae@realtek.com>
 License: GPL-2.0+
 
 Files: debian/*
-Copyright: © 2011-2018 Andreas Beckmann <anbe@debian.org>
+Copyright: © 2011-2020 Andreas Beckmann <anbe@debian.org>
            © 2011-2012 Dmitry Smirnov <onlyjob@member.fsf.org>
 License: GPL-2.0+
 
