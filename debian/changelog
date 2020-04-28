@@ -1,6 +1,7 @@
 r8168 (8.048.02-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.048.02 (2020-03-19).
+  * Bump Standards-Version to 4.5.0 (no changes needed).
 
  -- Andreas Beckmann <anbe@debian.org>  Tue, 28 Apr 2020 22:20:15 +0200
 
