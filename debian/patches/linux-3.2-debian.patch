@@ -3,7 +3,7 @@ Description: eth_hw_addr_random() was backported in Debian
 
 --- a/src/r8168_n.c
 +++ b/src/r8168_n.c
-@@ -555,7 +555,7 @@ static inline u32 mii_stat1000_to_ethtoo
+@@ -571,7 +571,7 @@ static inline u32 mii_stat1000_to_ethtoo
  
  #endif //LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0)
  
