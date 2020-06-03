@@ -3,6 +3,7 @@ r8168 (8.048.03-1) UNRELEASED; urgency=medium
   * New upstream release 8.048.03 (2020-05-25).
   * Refresh patches.
   * Switch to debhelper-compat (= 13).
+  * Use Testsuite: autopkgtest-pkg-dkms.
 
  -- Andreas Beckmann <anbe@debian.org>  Wed, 03 Jun 2020 11:16:28 +0200
 

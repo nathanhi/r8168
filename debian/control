@@ -11,6 +11,7 @@ Homepage: https://www.realtek.com/en/component/zoo/category/network-interface-co
 Vcs-Browser: https://salsa.debian.org/debian/r8168
 Vcs-Git: https://salsa.debian.org/debian/r8168.git
 XS-Autobuild: yes
+Testsuite: autopkgtest-pkg-dkms
 
 Package: r8168-dkms
 Architecture: all
