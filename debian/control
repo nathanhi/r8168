@@ -3,7 +3,7 @@ Section: non-free/kernel
 Priority: optional
 Maintainer: Andreas Beckmann <anbe@debian.org>
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 13),
  dkms,
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
