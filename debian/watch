@@ -1,10 +1,15 @@
-version=3
+version=4
 
 # The upstream download page at
-# http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
-# uses javascript to actually generate the download URL which finally
-# redirects to a dynamically created ftp account like
-# ftp://user:password@ip.ip.ip.ip/path/to/r8168-(.*).tar.bz2
+# https://www.realtek.com/en/component/zoo/category/network-interface-controllers-10-100-1000m-gigabit-ethernet-pci-express-software
+# does not offer direct download links but rather redirects via hashes
+# and mandatory email registration to a temporary download location.
+# Therefore we can only parse the version number from the upstream
+# download page.
 
-# But there exist unofficial mirrors ...
-https://github.com/mtorromeo/r8168/releases /mtorromeo/r8168/archive/([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)
+opts=searchmode=plain \
+https://www.realtek.com/en/component/zoo/category/network-interface-controllers-10-100-1000m-gigabit-ethernet-pci-express-software \
+GBE.Ethernet.LINUX.driver.r8168[^<]*</td>[^\d]*([\d\.]+)[^<]*</td>
+
+# There exist unofficial mirrors ... but they are not always in sync.
+#https://github.com/mtorromeo/r8168/releases /mtorromeo/r8168/archive/([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)
