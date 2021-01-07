@@ -1,5 +1,6 @@
 Author: Andreas Beckmann <anbe@debian.org>
 Description: eth_hw_addr_random() was backported in Debian
+Forwarded: not-needed
 
 --- a/src/r8168_n.c
 +++ b/src/r8168_n.c
