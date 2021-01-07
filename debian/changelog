@@ -1,6 +1,7 @@
 r8168 (8.048.03-2) UNRELEASED; urgency=medium
 
   * d/watch: Parse only the version number from the upstream download page.
+  * Bump Standards-Version to 4.5.1 (no changes needed).
 
  -- Andreas Beckmann <anbe@debian.org>  Thu, 12 Nov 2020 15:34:17 +0100
 
