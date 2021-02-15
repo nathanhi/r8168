@@ -1,8 +1,8 @@
-r8168 (8.048.03-3) UNRELEASED; urgency=medium
+r8168 (8.048.03-3) unstable; urgency=medium
 
   * Switch to dh-sequence-dkms.
 
- -- Andreas Beckmann <anbe@debian.org>  Mon, 15 Feb 2021 16:05:23 +0100
+ -- Andreas Beckmann <anbe@debian.org>  Mon, 15 Feb 2021 16:08:14 +0100
 
 r8168 (8.048.03-2) unstable; urgency=medium
 
