@@ -5,7 +5,7 @@
 include /usr/share/dpkg/pkg-info.mk
 
 %:
-	dh $@ --with dkms
+	dh $@
 
 override_dh_install:
 	dh_install src/*.h src/*.c src/Makefile usr/src/r8168-$(DEB_VERSION_UPSTREAM)/

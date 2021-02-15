@@ -1,3 +1,9 @@
+r8168 (8.048.03-3) UNRELEASED; urgency=medium
+
+  * Switch to dh-sequence-dkms.
+
+ -- Andreas Beckmann <anbe@debian.org>  Mon, 15 Feb 2021 16:05:23 +0100
+
 r8168 (8.048.03-2) unstable; urgency=medium
 
   * d/watch: Parse only the version number from the upstream download page.
