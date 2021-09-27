@@ -1,10 +1,10 @@
-r8168 (8.049.02-1) UNRELEASED; urgency=medium
+r8168 (8.049.02-1) unstable; urgency=medium
 
   * New upstream release 8.049.02 (2021-06-30).  (Closes: #992284)
   * Refresh patches.
   * Bump Standards-Version to 4.6.0 (no changes needed).
 
- -- Andreas Beckmann <anbe@debian.org>  Mon, 27 Sep 2021 20:53:46 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Mon, 27 Sep 2021 21:22:35 +0200
 
 r8168 (8.048.03-3) unstable; urgency=medium
 
