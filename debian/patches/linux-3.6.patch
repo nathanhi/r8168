@@ -3,7 +3,7 @@ Description: this was not changed in 3.6 but in 3.7
 
 --- a/src/r8168_n.c
 +++ b/src/r8168_n.c
-@@ -6207,7 +6207,7 @@ static int rtl_nway_reset(struct net_dev
+@@ -6458,7 +6458,7 @@ static int rtl_nway_reset(struct net_dev
          return ret;
  }
  
@@ -12,7 +12,7 @@ Description: this was not changed in 3.6 but in 3.7
  static int
  rtl_ethtool_get_eee(struct net_device *net, struct ethtool_eee *eee)
  {
-@@ -6294,7 +6294,7 @@ rtl_ethtool_set_eee(struct net_device *n
+@@ -6547,7 +6547,7 @@ rtl_ethtool_set_eee(struct net_device *n
  
          return 0;
  }
@@ -21,7 +21,7 @@ Description: this was not changed in 3.6 but in 3.7
  
  #if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,22)
  static const struct ethtool_ops rtl8168_ethtool_ops = {
-@@ -6342,10 +6342,10 @@ static const struct ethtool_ops rtl8168_
+@@ -6595,10 +6595,10 @@ static const struct ethtool_ops rtl8168_
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)
          .get_ts_info        = ethtool_op_get_ts_info,
  #endif //LINUX_VERSION_CODE >= KERNEL_VERSION(3,5,0)

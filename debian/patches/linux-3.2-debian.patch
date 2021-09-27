@@ -4,7 +4,7 @@ Forwarded: not-needed
 
 --- a/src/r8168_n.c
 +++ b/src/r8168_n.c
-@@ -571,7 +571,7 @@ static inline u32 mii_stat1000_to_ethtoo
+@@ -680,7 +680,7 @@ static inline u32 mii_stat1000_to_ethtoo
  
  #endif //LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0)
  
