@@ -1,6 +1,7 @@
 r8168 (8.050.00-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.050.00 (2022-04-28).  (Closes: #1010177)
+  * Refresh patches.
 
  -- Andreas Beckmann <anbe@debian.org>  Wed, 04 May 2022 23:20:37 +0200
 
