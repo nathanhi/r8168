@@ -2,3 +2,4 @@ linux-2.6.patch
 linux-3.2-debian.patch
 linux-3.5.patch
 linux-3.6.patch
+linux-5.18.patch

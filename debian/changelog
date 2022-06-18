@@ -1,6 +1,7 @@
 r8168 (8.050.03-1) UNRELEASED; urgency=medium
 
   * New upstream release 8.050.03 (2022-06-07).
+  * Add patch for Linux 5.18 from Arch Linux.
 
  -- Andreas Beckmann <anbe@debian.org>  Sat, 11 Jun 2022 02:11:38 +0200
 
