@@ -1,3 +1,10 @@
+r8168 (8.051.02-2) UNRELEASED; urgency=medium
+
+  * Restrict the supported kernel versions to 3.14 or later due to usage of
+    pci_enable_msix_range().
+
+ -- Andreas Beckmann <anbe@debian.org>  Thu, 01 Dec 2022 02:53:45 +0100
+
 r8168 (8.051.02-1) unstable; urgency=medium
 
   * New upstream release 8.051.02 (2022-11-15).
