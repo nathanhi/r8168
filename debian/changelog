@@ -1,5 +1,6 @@
 r8168 (8.051.02-2) UNRELEASED; urgency=medium
 
+  * Add patch for Linux 6.1.
   * Restrict the supported kernel versions to 3.14 or later due to usage of
     pci_enable_msix_range().
 
