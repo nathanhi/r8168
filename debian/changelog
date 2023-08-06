@@ -1,6 +1,7 @@
 r8168 (8.051.02-3) UNRELEASED; urgency=medium
 
   * Add patch for Linux 6.5.
+  * Bump Standards-Version to 4.6.2 (no changes needed).
 
  -- Andreas Beckmann <anbe@debian.org>  Sun, 06 Aug 2023 13:26:41 +0200
 
