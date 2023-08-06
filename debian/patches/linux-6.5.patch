@@ -1,0 +1,16 @@
+Author: Andreas Beckmann <anbe@debian.org>
+Description: fix module build for Linux 6.5
+
+--- a/src/r8168_n.c
++++ b/src/r8168_n.c
+@@ -84,6 +84,10 @@
+ #include <asm/io.h>
+ #include <asm/irq.h>
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,5,0)
++#include <net/gso.h>
++#endif
++
+ #include "r8168.h"
+ #include "r8168_asf.h"
+ #include "rtl_eeprom.h"

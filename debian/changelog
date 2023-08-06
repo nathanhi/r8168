@@ -1,3 +1,9 @@
+r8168 (8.051.02-3) UNRELEASED; urgency=medium
+
+  * Add patch for Linux 6.5.
+
+ -- Andreas Beckmann <anbe@debian.org>  Sun, 06 Aug 2023 13:26:41 +0200
+
 r8168 (8.051.02-2) unstable; urgency=medium
 
   * Add patch for Linux 6.1.
