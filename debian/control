@@ -20,8 +20,8 @@ Description: dkms source for the r8168 network driver
  r8168 is the Linux device driver released by RealTek for their network
  controllers with PCI-Express interface:
   * 10/100/1000M Gigabit Ethernet: RTL8111B, RTL8111C, RTL8111D, RTL8111E,
-    RTL8111F, RTL8111G(S), RTL8111H(S), RTL8118(A)(S), RTL8119i, RTL8111L,
-    RTL8111K, RTL8168B, RTL8168E, RTL8168H, RTL8111DP, RTL8111EP, RTL8111FP,
+    RTL8111F, RTL8111G, RTL8111H, RTL8118A, RTL8119i, RTL8111L, RTL8111K,
+    RTL8168B, RTL8168E, RTL8168H, RTL8111DP, RTL8111EP(P), RTL8111FP,
     RTL8411, RTL8411B
  .
  This driver should only be used for devices not yet supported by the
