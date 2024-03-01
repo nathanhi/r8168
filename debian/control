@@ -33,3 +33,5 @@ Description: dkms source for the r8168 network driver
  .
  This package provides the dkms source code for the r8168 kernel modules.
  Kernel source or headers are required to compile these modules.
+ .
+ Building the kernel module has been tested up to Linux ${r8168:tested:Linux}.
