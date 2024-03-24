@@ -1,3 +1,9 @@
+r8168 (8.052.01-1-bpo12) unstable; urgency=low
+
+  * Backport 8.052.01-1 to Debian 12 for Proxmox VE 8 Kernel compatibility
+
+ -- Nathan-J. Hirschauer <nathanhi@deepserve.info>  Sun, 24 Mar 2024 19:34:04 +0100
+
 r8168 (8.052.01-1) unstable; urgency=medium
 
   * New upstream release 8.052.01 (2023-09-28).
