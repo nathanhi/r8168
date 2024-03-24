@@ -1,3 +1,9 @@
+r8168 (8.053.00-1-bpo12) unstable; urgency=low
+
+  * Backport 8.053.00-1 to Debian 12 for Proxmox VE 8 Kernel compatibility
+
+ -- Nathan-J. Hirschauer <nathanhi@deepserve.info>  Sun, 19 May 2024 17:23:04 +0200
+
 r8168 (8.053.00-1) unstable; urgency=medium
 
   * New upstream release 8.053.00 (2024-04-18).
@@ -5,6 +11,12 @@ r8168 (8.053.00-1) unstable; urgency=medium
   * Update upstream URLs.
 
  -- Andreas Beckmann <anbe@debian.org>  Sun, 28 Apr 2024 15:36:25 +0200
+
+r8168 (8.052.01-1-bpo12) unstable; urgency=low
+
+  * Backport 8.052.01-1 to Debian 12 for Proxmox VE 8 Kernel compatibility
+
+ -- Nathan-J. Hirschauer <nathanhi@deepserve.info>  Sun, 24 Mar 2024 19:34:04 +0100
 
 r8168 (8.052.01-1) unstable; urgency=medium
 

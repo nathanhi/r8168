@@ -1,0 +1,39 @@
+name: 'Release rtl8168-dkms.deb'
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Clean workspace
+        run: git clean -dfx
+
+      - name: Build container image
+        run: docker build .
+
+      - name: Package rtl8168-dkms
+        run: docker run --rm -v ./build:/usr/src -v $(pwd):/usr/src/rtl8168 -w /usr/src/rtl8168 -i $(docker build -q .) dpkg-buildpackage -us -uc --no-sign -A
+
+      - name: Find .deb file
+        id: find-deb
+        run: echo "deb_path=$(cd build; echo *.deb)" >> $GITHUB_OUTPUT
+
+      - name: Upload .deb to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build/${{ steps.find-deb.outputs.deb_path }}
+          asset_name: ${{ steps.find-deb.outputs.deb_path }}
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
