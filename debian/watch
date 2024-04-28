@@ -1,15 +1,15 @@
 version=4
 
 # The upstream download page at
-# https://www.realtek.com/en/component/zoo/category/network-interface-controllers-10-100-1000m-gigabit-ethernet-pci-express-software
+# https://www.realtek.com/Download/List?cate_id=584
 # does not offer direct download links but rather redirects via hashes
 # and mandatory email registration to a temporary download location.
 # Therefore we can only parse the version number from the upstream
 # download page.
 
 opts=searchmode=plain \
-https://www.realtek.com/en/component/zoo/category/network-interface-controllers-10-100-1000m-gigabit-ethernet-pci-express-software \
-GBE.Ethernet.LINUX.driver.r8168[^<]*</td>[^\d]*([\d\.]+)[^<]*</td>
+https://www.realtek.com/Download/ListAllDownloadItem?cate_id=584 \
+r8168-([\d\.]+).tar.bz2
 
 # There exist unofficial mirrors ... but they are not always in sync.
 #https://github.com/mtorromeo/r8168/releases /mtorromeo/r8168/archive/([\d\.]+)\.(?:tar\.gz|tar\.bz2|tar\.xz)

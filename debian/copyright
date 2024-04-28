@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: r8168
-Source: http://www.realtek.com/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false#2
+Source: https://www.realtek.com/Download/List?cate_id=584
 Disclaimer:
  This package is not part of the GNU/Linux Debian distribution. It is
  provided in the non-free archive area as a convenience to Debian users.
