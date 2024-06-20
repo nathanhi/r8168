@@ -1,9 +1,9 @@
-r8168 (8.053.00-2) UNRELEASED; urgency=medium
+r8168 (8.053.00-2) unstable; urgency=medium
 
   * Add patch for Linux 6.9.
   * Bump Standards-Version to 4.7.0 (no changes needed).
 
- -- Andreas Beckmann <anbe@debian.org>  Fri, 21 Jun 2024 01:19:21 +0200
+ -- Andreas Beckmann <anbe@debian.org>  Fri, 21 Jun 2024 01:33:53 +0200
 
 r8168 (8.053.00-1) unstable; urgency=medium
 
