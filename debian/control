@@ -31,7 +31,7 @@ Description: dkms source for the r8168 network driver
  Installation of the r8168-dkms package will disable the in-kernel r8169
  module. To re-enable r8169, the r8168-dkms package must be purged.
  .
- This package provides the dkms source code for the r8168 kernel modules.
- Kernel source or headers are required to compile these modules.
+ This package provides the dkms source code for the r8168 kernel module.
+ Kernel source or headers are required to compile the module.
  .
  Building the kernel module has been tested up to Linux ${r8168:tested:Linux}.
