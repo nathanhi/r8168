@@ -2,7 +2,7 @@
 
 #export DH_VERBOSE=1
 
-LINUX_KMOD_TESTED	 = 6.9
+LINUX_KMOD_TESTED	 = 6.11
 
 include /usr/share/dpkg/pkg-info.mk
 
